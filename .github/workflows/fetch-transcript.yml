@@ -31,6 +31,9 @@ jobs:
         env:
           PROXY_USERNAME: ${{ secrets.PROXY_USERNAME }}
           PROXY_PASSWORD: ${{ secrets.PROXY_PASSWORD }}
+          PSQL_PASSWORD: ${{ secrets.PSQL_PASSWORD }}
+          PSQL_USERNAME: ${{ secrets.PSQL_USERNAME }}
+          PSQL_HOST: ${{ secrets.PSQL_HOST }}
         run: |
           python youtube_transcript.py
 
