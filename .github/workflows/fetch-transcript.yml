@@ -37,8 +37,24 @@ jobs:
           PSQL_HOST: ${{ secrets.PSQL_HOST }}
         run: |
           python youtube_transcript.py
+      - name: insert into vector script
+        env:
+          PROXY_USERNAME: ${{ secrets.PROXY_USERNAME }}
+          PROXY_PASSWORD: ${{ secrets.PROXY_PASSWORD }}
+          PSQL_PASSWORD: ${{ secrets.PSQL_PASSWORD }}
+          PSQL_USERNAME: ${{ secrets.PSQL_USERNAME }}
+          PSQL_HOST: ${{ secrets.PSQL_HOST }}
+        run: |  
           python insert_into_vector_db.py
-          python search_from_vector_db.py "database optimization"
+      - name: search from vector script 
+        env:
+          PROXY_USERNAME: ${{ secrets.PROXY_USERNAME }}
+          PROXY_PASSWORD: ${{ secrets.PROXY_PASSWORD }}
+          PSQL_PASSWORD: ${{ secrets.PSQL_PASSWORD }}
+          PSQL_USERNAME: ${{ secrets.PSQL_USERNAME }}
+          PSQL_HOST: ${{ secrets.PSQL_HOST }}
+        run: |  
+          python search_from_vector_db.py "database"
 
       - name: Commit transcript file
         run: |
