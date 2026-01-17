@@ -62,6 +62,7 @@ jobs:
           python insert_into_vector_db.py
       - name: search from vector script 
         env:
+          QUESTION_TEXT: ${{ inputs.question_text }}
           PROXY_USERNAME: ${{ secrets.PROXY_USERNAME }}
           PROXY_PASSWORD: ${{ secrets.PROXY_PASSWORD }}
           PSQL_PASSWORD: ${{ secrets.PSQL_PASSWORD }}
