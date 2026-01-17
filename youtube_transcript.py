@@ -1,3 +1,4 @@
+import inputs
 from pytube import Playlist
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
@@ -55,5 +56,9 @@ def fetch_playlist_transcripts(playlist_url: str, output_dir="transcripts"):
 
 
 if __name__ == "__main__":
-    playlist_url = "https://youtube.com/playlist?list=PLMCXHnjXnTnszR6YSo1tQK2BMr15cC9Zh"
-    fetch_playlist_transcripts(playlist_url)
+    playlist_url = os.environ.get("YOUTUBE_URL")
+
+    if not playlist_url or playlist_url.strip() == "":
+        print("Please set the YOUTUBE_URL environment variable.")
+    else:
+        fetch_playlist_transcripts(playlist_url)
