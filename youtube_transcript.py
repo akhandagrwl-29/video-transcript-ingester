@@ -1,4 +1,3 @@
-import inputs
 from pytube import Playlist
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
