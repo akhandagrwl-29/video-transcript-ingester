@@ -8,6 +8,12 @@ on:
         required: true
         default: ''
         type: string
+        
+      question_text:
+        description: "Type your question (string)"
+        required: true
+        type: string
+        default: 'the'
 
 jobs:
   fetch-transcript:
@@ -37,6 +43,7 @@ jobs:
       - name: Run transcript script
         env:
           YOUTUBE_URL: ${{ inputs.url }}
+          QUESTION_TEXT: ${{ inputs.question_text }}
           PROXY_USERNAME: ${{ secrets.PROXY_USERNAME }}
           PROXY_PASSWORD: ${{ secrets.PROXY_PASSWORD }}
           PSQL_PASSWORD: ${{ secrets.PSQL_PASSWORD }}
