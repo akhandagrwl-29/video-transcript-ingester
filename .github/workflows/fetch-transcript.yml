@@ -2,6 +2,12 @@ name: Fetch YouTube Transcript
 
 on:
   workflow_dispatch:
+    inputs:
+      url:
+        description: 'Youtube Playlist URL'
+        required: true
+        default: ''
+        type: string
 
 jobs:
   fetch-transcript:
