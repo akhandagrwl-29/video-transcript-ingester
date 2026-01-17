@@ -55,5 +55,5 @@ def fetch_playlist_transcripts(playlist_url: str, output_dir="transcripts"):
 
 
 if __name__ == "__main__":
-    playlist_url = "https://youtube.com/playlist?list=PLMCXHnjXnTnvo6alSjVkgxV-VH6EPyvoX"
+    playlist_url = "https://youtube.com/playlist?list=PLMCXHnjXnTnszR6YSo1tQK2BMr15cC9Zh"
     fetch_playlist_transcripts(playlist_url)
