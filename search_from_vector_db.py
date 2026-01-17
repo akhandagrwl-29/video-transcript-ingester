@@ -145,13 +145,13 @@ def format_results(results: List[Tuple[str, str, int, float, str]], query: str):
 
 def main():
     """Main function to run the search."""
-    if len(sys.argv) < 2:
-        print("Usage: python search_from_vector_db.py '<search query>' [top_k]")
-        print("Example: python search_from_vector_db.py 'database optimization' 10")
-        sys.exit(1)
+    # if len(sys.argv) < 2:
+    #     print("Usage: python search_from_vector_db.py '<search query>' [top_k]")
+    #     print("Example: python search_from_vector_db.py 'database optimization' 10")
+    #     sys.exit(1)
     
-    query = sys.argv[1]
-    top_k = int(sys.argv[2]) if len(sys.argv) > 2 else 5
+    query = os.environ.get("QUESTION_TEXT")
+    top_k = 5
     
     print(f"Searching for: '{query}'")
     print(f"Returning top {top_k} results...")
