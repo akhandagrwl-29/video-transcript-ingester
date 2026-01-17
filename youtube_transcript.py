@@ -26,6 +26,8 @@ def fetch_playlist_transcripts(playlist_url: str, output_dir="transcripts"):
         try:
             proxy_username = os.environ.get("PROXY_USERNAME")
             proxy_password = os.environ.get("PROXY_PASSWORD")
+            print("x:", proxy_username[0])
+            print("y:", proxy_password[0])
             
             ytt_api = YouTubeTranscriptApi(
                 proxy_config=WebshareProxyConfig(
@@ -34,11 +36,12 @@ def fetch_playlist_transcripts(playlist_url: str, output_dir="transcripts"):
                 )
             )
             transcript_list = ytt_api.fetch(video_id)
+            print("video_id is: ", video_id) 
 
             output_file = os.path.join(output_dir, f"{video_id}.txt")
             with open(output_file, "w", encoding="utf-8") as f:
                 for snippet in transcript_list:
-                    # print(snippet.text)
+                    print(snippet.text[:10])
                     f.write(snippet.text + " ")
 
             print(f"[{idx}] Saved transcript → {output_file}")
