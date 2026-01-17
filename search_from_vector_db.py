@@ -1,6 +1,7 @@
 import psycopg2
 import os
 import sys
+import requests
 from typing import List, Tuple, Optional
 from sentence_transformers import SentenceTransformer
 
@@ -32,17 +33,17 @@ def get_embedding(text: str) -> List[float]:
     """Generate embedding for the given text using SentenceTransformer."""
     if _embedding_model is None:
         raise RuntimeError("Embedding model not initialized")
-    
+
     embedding = _embedding_model.encode(text, convert_to_numpy=True)
     embedding_list = embedding.tolist()
-    
+
     # Pad to 1536 dimensions to match schema
     if len(embedding_list) != 1536:
         if len(embedding_list) < 1536:
             embedding_list = embedding_list + [0.0] * (1536 - len(embedding_list))
         else:
             embedding_list = embedding_list[:1536]
-    
+
     return embedding_list
 
 
@@ -51,43 +52,43 @@ def get_db_connection():
     PSQL_USERNAME = os.environ.get("PSQL_USERNAME")
     PSQL_PASSWORD = os.environ.get("PSQL_PASSWORD")
     PSQL_HOST = os.environ.get("PSQL_HOST")
-    
+
     if not PSQL_USERNAME:
         raise ValueError("PSQL_USERNAME environment variable is not set")
     if not PSQL_PASSWORD:
         raise ValueError("PSQL_PASSWORD environment variable is not set")
     if not PSQL_HOST:
         raise ValueError("PSQL_HOST environment variable is not set")
-    
+
     neon_db_url = f'postgresql://{PSQL_USERNAME}:{PSQL_PASSWORD}@{PSQL_HOST}/neondb?sslmode=require&channel_binding=require'
-    
+
     conn = psycopg2.connect(neon_db_url)
-    
+
     # Register pgvector adapter if available
     if PGVECTOR_AVAILABLE:
         pgvector.psycopg2.register_vector(conn)
-    
+
     return conn
 
 
 def search_vector_db(query_text: str, top_k: int = 5) -> List[Tuple[str, str, int, float, str]]:
     """
     Search the vector database for similar transcript chunks.
-    
+
     Args:
         query_text: The search query text
         top_k: Number of top results to return (default: 5)
-    
+
     Returns:
         List of tuples: (video_id, content, chunk_index, similarity_score, full_content_preview)
     """
     # Generate embedding for the query
     query_embedding = get_embedding(query_text)
-    
+
     # Connect to database
     conn = get_db_connection()
     cur = conn.cursor()
-    
+
     try:
         # Format embedding for database query
         if PGVECTOR_AVAILABLE:
@@ -97,7 +98,7 @@ def search_vector_db(query_text: str, top_k: int = 5) -> List[Tuple[str, str, in
             # Format as string array
             embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
             embedding_value = embedding_str
-        
+
         # Perform cosine similarity search using pgvector
         # Using 1 - cosine_distance for similarity (higher is better)
         cur.execute(
@@ -114,11 +115,11 @@ def search_vector_db(query_text: str, top_k: int = 5) -> List[Tuple[str, str, in
             """,
             (embedding_value, embedding_value, top_k)
         )
-        
+
         results = cur.fetchall()
-        
+
         return results
-    
+
     finally:
         cur.close()
         conn.close()
@@ -129,11 +130,11 @@ def format_results(results: List[Tuple[str, str, int, float, str]], query: str):
     if not results:
         print(f"\nNo results found for query: '{query}'")
         return
-    
+
     print(f"\n{'='*80}")
     print(f"Search Results for: '{query}'")
     print(f"{'='*80}\n")
-    
+
     for i, (video_id, content, chunk_index, similarity, _) in enumerate(results, 1):
         print(f"Result {i}:")
         print(f"  Video ID: {video_id}")
@@ -142,6 +143,22 @@ def format_results(results: List[Tuple[str, str, int, float, str]], query: str):
         print(f"  Content Preview: {content[:200]}..." if len(content) > 200 else f"  Content: {content}")
         print(f"  {'-'*78}\n")
 
+        # Send notification for each result
+        try:
+            youtube_url = f"https://www.youtube.com/watch?v={video_id}"
+            email = os.environ.get("EMAIL")
+            response = requests.post(
+                "https://ntfy.sh/yt-finder",
+                data=youtube_url,
+                headers={
+                    "Email": email,
+                    "Priority": "high"
+                }
+            )
+            print(f"  Notification sent for {video_id} (Status: {response.status_code})")
+        except Exception as e:
+            print(f"  Failed to send notification for {video_id}: {e}")
+
 
 def main():
     """Main function to run the search."""
@@ -149,20 +166,20 @@ def main():
     #     print("Usage: python search_from_vector_db.py '<search query>' [top_k]")
     #     print("Example: python search_from_vector_db.py 'database optimization' 10")
     #     sys.exit(1)
-    
+
     query = os.environ.get("QUESTION_TEXT")
     top_k = 5
-    
+
     print(f"Searching for: '{query}'")
     print(f"Returning top {top_k} results...")
-    
+
     try:
         results = search_vector_db(query, top_k=top_k)
         format_results(results, query)
-        
+
         # Also return results for programmatic use
         return results
-    
+
     except Exception as e:
         print(f"Error during search: {e}")
         import traceback
