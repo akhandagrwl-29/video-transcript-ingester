@@ -36,6 +36,7 @@ jobs:
 
       - name: Run transcript script
         env:
+          YOUTUBE_URL: ${{ inputs.url }}
           PROXY_USERNAME: ${{ secrets.PROXY_USERNAME }}
           PROXY_PASSWORD: ${{ secrets.PROXY_PASSWORD }}
           PSQL_PASSWORD: ${{ secrets.PSQL_PASSWORD }}
