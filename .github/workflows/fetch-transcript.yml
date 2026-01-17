@@ -15,6 +15,12 @@ on:
         type: string
         default: 'the'
 
+      email:
+        description: "Enter your email"
+        required: true
+        type: string
+        default: '@gmail.com'
+
 jobs:
   fetch-transcript:
     runs-on: ubuntu-latest
@@ -68,6 +74,7 @@ jobs:
           PSQL_PASSWORD: ${{ secrets.PSQL_PASSWORD }}
           PSQL_USERNAME: ${{ secrets.PSQL_USERNAME }}
           PSQL_HOST: ${{ secrets.PSQL_HOST }}
+          EMAIL: ${{ inputs.email }}
         run: |  
           python search_from_vector_db.py
 
