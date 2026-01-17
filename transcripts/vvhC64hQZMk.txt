@@ -1,0 +1,333 @@
+Hi everyone. This is GKCS. This
+is a video on designing WhatsApp. It's a chat based application, so
+once you know how to design WhatsApp, you will be able to design any chat
+based application to a large extent. The special things about WhatsApp are
+that they have group messaging and they have these read receipts. So those are the two key features that
+people look for in a normal system design interview. But there's also other features that we'll
+be talking about and we'll be talking about the features that we should probably
+not take up during an interview and basically choose the kind of things that
+we are doing so that we can actually finish in the hour that we have. Now, amongst all the features that you
+can ask your interviewer as to, would you like this? Would you like that? Probably you should start simple and
+you should start with things that you already know, because I've noticed that the first
+feature that you ask for the interviewer usually says yes. So one of the things
+I'm comfortable with is group messaging. So WhatsApp has groups at most,
+200 people can enter these groups, and so group messaging is something
+that I understand to a good extent. Image sharing is another good
+question to ask as to are images going to be shared in these messages?
+And almost obvious answer is yes, we will allow image sharing
+or video sharing. Also a good question, but I mean this is
+something that if you have used WhatsApp, you'll know about is sent,
+delivered, and read receipts. So you have those tick marks coming in
+based on what stage is the message on. The final two things are not critical
+to an application in terms of features, but it's nice to think
+of in an engineering way. The first one being that is the
+person online. And if they're not, then when was the last time that they
+were seen on the chat? And the second thing is, are the chats
+temporary or are they permanent? So if you have a look at Snapchat, or
+even if you have a look at WhatsApp, in a way, they're much more temporary than a lot
+of the office messaging applications. The reason for this is because
+you want a lot of privacy. You want to give the user
+a lot of power. Also, it actually saves a lot of storage
+space if you think about the chats being stored in the user's applications only. But if there is any sort of compliance
+that you need or if there is any official communication, then you want that
+message to be stored somewhere forever. So that's another thing that we'll be
+asking. Although WhatsApp gives you, so to speak, only temporary chats, if you delete the app and if
+your friend also deletes the app, those chat messages are lost forever.
+So one thing I'd like to say is that image sharing has already
+been taken up on this channel. If you want to have a look at how this
+is done, have a look at the Tinder video. It explains how images can be stored,
+retrieved, et cetera, et cetera, in a sensible engineering way. So you're left with four
+features for this video, and the first one we'll be
+picking up is group messaging. Before we get to group messaging, we need to first talk about how does
+one person send a message to another person? So that is one-to-one
+chat, and that is our requirement, which is 1, 2, 1 chat. Alright, this is what we are coming to,
+okay, let's take this step by step. A lot of the things that I'll be
+discussing in this are there in the system design playlist. So have a look at that. When you're
+looking for things like load balancing, when you're looking for
+things like messaging cues, I'll be using those
+things as abstractions, as structures to meet all the
+features that we have talked about. If you want any detail, then
+you can always go there. Single point of failure is also something
+pretty important in the WhatsApp architecture. So have a look
+at those. Now let's start. You have the application
+installed in your cell phone. You connect to WhatsApp on the cloud. The place that you're connecting
+to is called a gateway. The reason for this is because you'll be
+using an external protocol when you're talking to WhatsApp, but WhatsApp might be talking in a
+different language with its internal services. Main reason being that
+you don't need that much security. You don't need those big headers that
+H T P provides you when you're talking internally because a lot of the security
+mechanisms are taken care of on the gateway itself. So once you
+do connect to the gateway, let's assume that you're actually
+sending a message to person B. So you are person A and
+you're sending to person B, person A connects to the gateway. The gateway actually needs to
+send it to person B. Somehow you could store this information
+as to which users are connected to which box in the gateway
+itself. In that case, you would need some sort of a user to box mapping. Okay? For the gateway
+service, which is a microservice itself, it needs to store the information as to
+this user ID is currently connected to box number two. So if this
+is box number 1, 2, 3, then there needs to be information saying
+that B is connected to two and A is connected to one. When you have this kind of information
+being stored on the boxes itself, it's going to be an expensive thing.
+Why is it expensive? Because maintaining a connection, a TCP
+connection itself takes some memory. What you want to do is you want to
+actually increase the maximum number of connections that you can store in a single
+box and you don't want that memory to be wasted by keeping information
+for who is connected to which box. Second thing is this information is
+being duplicated on all three servers. Either it's being duplicated,
+there's some caching mechanism, or there is some database which
+is actually handling this. This is transient information, so there's going to be a lot of updates
+going on over here and this is not nice. There's a lot of coupling
+that I can see in this system. So what you want to do is you
+want to keep a dumb connection. This TCP connection should be dumb in
+the sense that it just takes information, gives information, it doesn't know
+what it's doing. Apart from that, the person you want to be asking for
+when it comes to information on who is connected to which box is
+a microservice in itself, and this microservice can be
+the sessions microservice. What does a sessions microservice store?
+Well, who's connected to which box? Just that information that we were
+storing over here and was being handled by the gateway has been decoupled from the
+system and being sent to the sessions Microservice, you can see that there are multiple
+servers for single point of failure avoidance. Okay? So when a user is sending user
+A is sending some message, it actually asks for send message
+With the user ID for B, when the
+gateway gets this message, it's pretty dumb. It
+doesn't know what to do, it just sends it to the
+session service, okay? This session service is indirectly
+a router. When it gets this message, when it gets this request either
+of send message to user B, what it does is it figures
+out where does user B exist, which box is user B connected to? And then routes this message basically
+sending this message to gateway two to send it back to user B. Now what's happened is A
+has sent a message to B. Interesting. How can A send a message to B if the
+server is sending this final bit where the gateway two is sending a message to
+be. This can't be done using S G T P. It's a server to client protocol. I mean rather it's a client to server
+protocol. So the client sends requests, the server gives responses. So you cannot send a message
+from the server to the client. You can only send requests from
+client to server. There's many ways to get over this using HTTP itself. One
+of them is long polling. In which case, what happens is every minute
+or so B can ask for, Hey, are there any new messages for me? And then the gateway or the
+sessions management service, which are one you would like
+can send it the message. Of course this is not real time.
+And if you want something real time, especially for chat applications, which it's very important
+to have the real time thing. So S TT P is not something that we
+can use and we need another protocol over T C P. And the thing that we are looking
+for really are web sockets. So web sockets are super nice when
+it comes to chat applications. The main reason being that they can
+allow you peer to peer communication. So A send to B, B send to A, there's no
+client or server semantics over here. So with that, what happens is literally the server
+can send a message to the client. B, okay, so we are happy B got the message, what now? Well, B got the message.
+So that means it has been delivered. At this point, user A should be notified
+that the message has been delivered. There's one place that I missed out on. When the message actually gets to the
+gateway and gets to the session service, what it can do is you can send a
+parallel response to gateway one saying that, okay, I got the message now it's going to
+be sent to user B when it's possible, let's say a different
+database for the chat. And because it's stored in the
+database, it's safe, it's persistent, it'll keep retrying the
+message till user B gets it. So A is guaranteed that B
+is going to get the message. So it should get the sent receipt. So just give a response saying that, okay, I got the message gateway one is now
+going to send the message to user A. So sent is taken care of when this
+entire flow is completed. When B gets the message for the first time, how deliver,
+how do we give a delivery receipt? Once you send the message to B
+and b actually got the message, it should respond. I mean it should again go to gateway
+two and say that got the message. That's an acknowledgement, a TCP acknowledgement when
+gateway two gets this message, it sends it again to the session
+service saying that, Hey, this message was received.
+So this message was received. The message is going to be
+containing A two and A from field. Yeah. So the session service,
+what it can do is, okay, the message has been received by the
+person who was tagged over here too, which is B. So the person who sent
+the message from A should get a delivery receipt. And so sessions finds out again where
+A exists. That is box number one, send a delivery receipt.
+A gets a delivery receipt. Okay? And of course you can think
+about how red is going to work. The moment a person opens, the
+application comes and opens this chat tab. They send a message saying that red and
+the exact same flow takes care of red also. Alright, so that's a lot to digest if you like. Then you can go through
+this a little more. This is the very first feature
+of sending and basically delivering receipts to the sender. Okay? The second feature we are
+talking about is quite simple. It's about the last scene or is
+the person online right now at a scale, I mean at huge scale,
+when there's millions of users, everything gets complicated. But one of the principle architectural
+things that we can do over here is this. Simply put B just wants to know when A
+was online the last time this information has to be stored somewhere. And what
+the server can do is they can ask A, but that would be stupid. So instead,
+A is not even in the picture now, and the only messages which will be sent
+and received are from B and the server. So B asks the server,
+when does a online last? There needs to be some information
+in some table saying that this user was lost online at this time. So some timestamp and it will have some entry over here with a
+particular timestamp. The only question which remains is how
+is this row maintained the last seen timestamp for a particular
+user? This key value pair, whenever a user A makes does an activity, basically sending a message or reading
+a message or any kind of request to the server should be logged as an activity
+and that current timestamp should be persisted in this table. In that way, we can say that whenever A did
+anything, definitely they were online, which means that the last seen timestamp
+needs to be updated based on this. B can be told that if A is online or not. One of the key features over here is
+that if A was online three seconds ago, then B shouldn't be told that they
+were online three seconds ago. Instead, the showing tag should be online. Probably they haven't done any
+activity in the last three seconds. You can keep this threshold to anything
+that you like, maybe 10 seconds, maybe 15 seconds. But the important thing is they're either
+online or they were last seen at least let's say 20 seconds ago. The last scene tag is a little tricky
+to update even after taking in all activities. So what I'll be doing is whenever
+a user sends a request to the gateway, I'll be having
+a microservice, which is
+the last seen microservice. And what this will be doing is
+it's doing user activity tracking. Anytime there's an activity, they
+definitely send a message to the gateway. When they send a message to the gateway, I'm going to say that they're last
+seen at this point. Now interestingly, there might be some requests which
+are not being sent by the user, but by the application
+itself. For example, when you
+pull for certain messages, maybe you're offline,
+you're not using the app, but you want your application to
+notify you whenever there's a message. So for example, delivery receipt,
+that's not an activity by me. So the request should be smart in the
+sense that the client should be smart saying that this is a user activity and
+this is something that the application itself is doing. So two types of
+messages being sent by the client. One type is user activities, and the other one is let's say
+system generated or app messages. App requests. This can be a
+flag in the request itself. If it's an app request, don't
+send it to the last scene service. If it's a user activity, send
+it to the last scene service, it'll go and update the
+last seen timestamp for this user. And in that way, what can happen is user B can
+say whether the user is online, or at least they were last seen at this
+timestamp by querying this service. So feature three is also done. Alright, so we are. Very close to actually completing. This chat messaging
+application. As you can see, it's a pretty complicated hacker,
+but we get to everything one by one. Certain things that I like
+to skip over so to speak, is load balancer because we
+have already talked about this, so I won't be talking about how
+the load balancer balances the load across the system. There's one interesting thing which
+we have not talked about in the CDs, which is service discovery
+or heartbeat maintenance. And that will be taken in a separate
+video, but it's pretty interesting. You can have a look at some blogs, I'll probably post them
+in the description below. The authentication service is another
+thing that I'll be talking about later. Main reason being that it's quite simple, but it's something worth talking
+about as a basic principle. So that'll also be taken
+later. As you can see, these four services are things which
+are not really relevant to WhatsApp, so to speak. The profile services is
+a very generic service image services, sending emails and sending SMSs. Okay, then what is quota chat
+application sending messages. Now you can see that there are five
+users that are drawn over here. The red guys are in one group, the
+green guys are in the other group. So whenever a user from the
+red box sends a message, it should go to all other red boxes. And
+this is the feature of group messaging. So this red user is
+connected to gateway one, while we have the other red
+users connected to gateway two. So let us assume that we send a
+group message through this user. The problem here is that if the session
+service stores all the information for all groups, let us say the red group has these three
+users and they're connected to these three boxes. It's too complicated for
+the session service to handle. I mean, it's something that you can decouple.
+So that's what we have done. We have decoupled the information for
+who is existing in which group in a group service. Now, the session service, when it gets a message from a red
+user is going to be asking the group service, who are the other
+group members in this group? The group service can then
+respond saying 10 members with these user IDs exist in this group. Now the session service runs
+through its own database. Usually this information is going
+to be cached as much as possible, but it can figure out where
+these users are connected to through its database.
+I mean those 10 users. It had a mapping for
+user ID to connection. And that connection tells you which
+box, which gateway it exists in. So with this information, it can then route the messages to
+each of these users one by one. What if the group has too
+many members? Too bad? WhatsApp actually gives
+you a maximum limit of 200. There's a lot of chat applications
+which try to contain that to 500, 600. Main reason being that you'll be otherwise
+fanning out the request too much. If you've seen the Instagram design video, what happens in that is also when a
+celebrity actually posts something, it's effectively sending messages
+to sometimes millions of people, and that's not practical. So you have to either batch process them
+or you have to wait for these guys to pull them in a chat application because
+you want the messages to be real time as much as possible. You can't
+really have too much of a pull mechanism. Instead, what you do is you limit
+the number of people in a group. 200 is a slightly reasonable
+number compared to millions. Yeah, it's a very reasonable number. So what
+we are going be doing is we are going to be limiting the number of
+users we have to sum number X, and we are going to be assuming that
+the sessions can handle web sockets sending these messages to
+the relevant users. Okay? Now let's get into the details
+of this mechanism. I mean, we have the bare bones thing,
+how it's going to work, but the details are important. The first thing that I would do in this
+architecture is because a lot of users are going to be connecting to my gateways. These gateways are going
+to be starving from memory. That's the reason why we have
+separated out the session service. That's one good way to
+reduce memory footprint. The second thing you can do is
+passing in the message, right? Maybe the message is sent over S
+G T P, it's a chase on message, so on and so forth. You don't really want
+to pass the message converted into an object, do some smart things on it, find out whether it has been authenticated
+or not on the gateway itself, all those responsibilities, as
+many responsibilities as you can, you want to push away from the
+gateways because those are web sockets. Those are expensive. Those are
+actual users connected to your box. So I would send an UNPASSED message to
+the session service or to anyone I am sending it to. One smart way to actually send
+an UNPASSED message to any service that you want to is
+to have this unpassed message go through a passer microservice. You don't really need too many
+server just too hard enough. So I'll just call it parser and unser microservice. What it's going to be doing is it's
+going to take the unpassed message and going to be converting
+it to a sensible message. So if your internal
+protocol is instead of T P or written something or T C P
+audio, you have something like thrift, which is used by Facebook
+internally. So I would say thrift. Then you can pass the message
+over here itself, right? What is the advantage? Let
+me just, again, retrade, you get an electronic message over here. You send the electronic message forward, there's no work that you're
+doing on the gateway itself. This electronic message will be converted
+to a sensible programming language object by this passer on passer, alright? And that will then route it
+to the right place. Okay? So that's one way to reduce
+the memory footprint ratio. What are the other concerns or key
+areas that we should focus on? Group. ID to user id? And this is a
+one to many mapping, right? One group can have many user IDs and
+to reduce a lot of the duplication in information that you have, we go for
+something called consistent hashing. We should have a look at that. Consistent hashing helps you reduce
+the memory footprint across servers by delegating only some
+information to some boxes. Okay? Have a look at the video in case
+you're not sure what this is. Consistent hashing is going to allow
+you to actually route the request to the right box. What should be routed on the group id. If you have the
+request routed on the group id, then it can tell you that for this group, who are the users belonging
+to this group? Alright? That takes care of the
+routing mechanism we have in case anytime the group service fails, you send the message to the box, it fail.
+What do you do? You can retry, but you can only retry if you know
+what request you needed to sign next. So one of the mechanisms
+for this is message cues. Yeah, we have discussed this in the playlist
+so I won't be getting into too much detail, but message cues are nice in the sense
+that once you give a message to the message queue, it ensures that the message will be
+sent maybe now maybe 10 seconds later, maybe 15 seconds later. Those
+are configurable options. And also how many times
+you're going to retry. All of this is configurable
+in the message queue. If the message queue fails to send
+the message, even after five retries, it can tell you that it's failed. You propagate the failure all the
+way to the client saying that, no, I couldn't send this group
+message. Okay, that's also fine. But the client needs to be told that it's
+failed or it's cleared. Interestingly, when the group service gets this message,
+it can send a response that, yes, I got the message sessions, then
+sends a response to gateway, and the user who sends the original
+message, gets a sent tick mark. Group receipts when it
+comes to delivered or seen is pretty expensive. Main reason being
+that everyone needs to say, yeah, I got the message, I got the message, and then finally it has
+to come back to this guy. So we won't be getting into
+that many chat applications. Actually don't even
+have that. So it's fine. The final few interesting things when
+it comes to chat messaging or group messaging especially, is
+that you need item potency. There's an entire video I made on
+retrial and item potency. Again, taking the Tinder messaging example, so you can have a look at that
+for the technical details. This architecture is actually very
+resilient and as a chat system, it's going to do pretty well. There's some tips and tricks over here
+that you can get to know only if you have worked on messaging systems. So I'll
+give you a few examples. For example, I mean, I was just reading this blog that
+Facebook Messenger does it deprioritizes prioritises messages in case there's a
+huge event like let's say New Year's or let's say some festival
+like the Valley in India, there's going to be a lot of messages. Everyone's going to be wishing each
+other happy. The valley Happy New Year, and that's going to be putting
+a lot of load on the system. So all the principles of great limiting
+come in here where you don't take messages, which are very important. Or sometimes you just drop messages
+instead of dropping. I mean, the best thing to do is
+to deprioritize messages. Things like last seen can be ignored.
+The entire feature can be ignored. Has this message been
+delivered? Has it been received? Those are not as important as actually
+sending the message to the user. The first thing of the server, getting the message and
+the acknowledgement. That's
+all the user needs to know. Okay? That's more important than seeing whether
+the person has read the message or not. So by deprioritizing unimportant messages, you're actually keeping the system
+health good and you are performing okay instead of not performing at
+all. So do check out the course. It's really useful when you are
+designing systems like these. Of course, this takes care of the last
+requirement that we had, which was to send group messages. Yeah, that is requirement number one
+taken care of in the end. Alright, thank you so much for listening. Thank you so much for going
+through this system design. If you have any doubts or suggestions,
+you can leave them the comments below. If you liked the video, then hit the like button and if
+you want for other notifications, then hit the subscribe button
+and I'll see you next time. Oh, and I'll be posting a poll. So word
+for what you want to see next time. See ya. 

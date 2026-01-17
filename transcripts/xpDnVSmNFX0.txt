@@ -1,0 +1,103 @@
+This video is on the
+basics of system design. If you have never designed
+a system before, this is
+probably the place to start. So imagine you have a computer with you
+in which you have written an algorithm. So some code is running on
+this computer and this code is like a normal function. It takes some
+input and it gives out an output. Now people look at this code and they
+decide that this is really useful to them. So they're ready to pay you so
+that they can use that code. Now you cannot go around giving
+your computer to everybody. So what you do is you
+expose your code using some protocol, which is going to
+be running on the internet, and by exposing your code
+using something called an a p i application programmable
+interface, when your code does run, it'll give an output and instead of
+storing that in the file or storing it in some database or something like that, you return that and that's
+called a response. Interestingly, the thing that is sent to
+you is called a request where people request you. So that's
+what it is. There's a request sent, and for each request, there's a corresponding response that
+your computer will be sending back. Imagine setting up this computer. It might require a database
+to be connected to it. It's within the desktop itself. You might require to configure these
+endpoints that people are connecting to. And you also need to take
+into consideration what
+happens if there's a power loss. If someone pulls the
+plug or something like that, you cannot afford to have your service
+go down because there's lots of people paying money for you. You should
+host your services on the cloud. So what's the difference between a
+desktop and a cloud? Nothing really. The cloud is a set of computers that
+somebody provides to you for money, of course. So if you pay a
+cloud solution, for example, Amazon Web Services, which is the most
+popular one, if you pay these guys, they're going to give
+you computation power. Computation power is nothing but a
+desktop that they have somewhere which can run your algorithm. How will you actually
+store your algorithm in that desktop? Well, you can do something
+like a remote login into that desktop. That's what the cloud
+is. It's a set of desktops, not necessarily desktops, but a set of computers that you
+can use to run your service. The reason we like to do this
+is because the configuration, the settings the reliability can be
+taken care of to a large extent by the solution providers. So now that we have our
+server hosted on a cloud, which is basically some computer
+that we don't know about, we can focus on the business requirements. What business requirements
+could we possibly have? Well, there's lots of people who
+are using algorithm now, and it gets to a point where the code
+that you have running on the machine is not able to handle all of these
+connections. So what do you do? One of the solutions is to
+buy a bigger machine, Right? This is solution number one. The solution
+number two is to buy more machines. The ability to handle more requests by
+buying more machines or buying bigger machines is called scalability. And this is a very important term
+that we need to understand. Well, like we said, we can handle more requests
+by throwing more money at the problem. When you're buying bigger machines, it means that your computer's going to
+be larger and therefore it can process the requests faster. So that
+is called vertical scaling. And when you're buying more machines, it means that the request can fall on
+any one of these machines and it'll be processed, but because
+you have more of them, the requests can be randomly distributed
+amongst the machines that you have just bought. And that is
+called horizontal scaling. These are two mechanisms by which you
+can increase the scalability of your system. Like we said, scalability is
+being able to handle more requests. Like any two approaches, we can
+compare them with the pros and cons. The first one that we have talked about
+is we need some sort of load balancing here. Well, that's not the case here. If you have a single machine,
+there's no load to balance as such. The second point is that
+with lots of machines, if one of the machine fails, you can
+redirect the request to the other ones. While over here, there's
+a single point of failure. So this is a single point failure and here it is resilient. The third
+thing to note is that all the communication that we have between
+the servers will be over the network and network calls us slow. It's io while over here you
+have interprocess communication. So that is quite fast. So here, there is interprocess communication. While over here we have network calls Between two services. So that
+is remote procedure calls. So this is slow and this is fast. The fourth point is data
+consistency. For example, let's say you are having a transaction
+where 3 cents some data to four and then 4 cents it to five and 5 cents it to one. Here you see that the data
+is complicated to maintain. If there is a transaction where
+the operation has to be atomic, what could happen is that we have
+to lock all the servers, right? All the databases that they're
+using, which is impractical. So usually what happens is we have some
+sort of loose transactional guarantee, and that's, that's the reason why here,
+the data consistency is a real issue. While over here, there's just one system
+on which all the data rec resides, and that's why this is consistent. The final point deals with some hardware
+limitations that you're gonna have because we cannot just make the computer
+bigger and bigger and bigger and solve the problem. There's going to be some
+hardware limit that we have here. Point number five, and over here, this scales well in the sense that the, the amount of servers that you throw at
+the problem is almost linear in terms of how many users are added. These are the five key differences that
+vertical scaling and horizontal scaling have. So what do you think is
+used in the real world? Both. we take some of the good
+qualities of vertical scaling, which is really fast into
+process communication and
+the data being consistent. So the cache is going to be consistent.
+There's no dirty reads, dirty rights, so to speak. We take these two good qualities
+from here and we take these two good qualities from here, which is
+it scales well because the, there's a hardware limit over here and
+it's also resilient in the sense that if one of the server crashes,
+somebody else can come up. Okay? So the hybrid solution is
+essentially horizontal scaling only, where each machine has a big box. I mean each machine, you try to
+take as big a box as possible, as feasible money-wise. And then we, we pick up a solution this way. Initially you can vertical scale as
+much as you like later on when the users start trusting you, you should
+probably go for horizontal scaling. So these are the major considerations
+we have when designing a system. Is it scalable? Is it
+resilient? And is it consistent with these qualities? There's always
+gonna be some trade-offs that we have, and that's what system design is. We design a system which is
+going to meet the requirements, and the requirements are such that
+it's going to be Computer science way is possible to actually
+build a system like this. If you have any doubts or suggestions,
+you can leave them in the comments below. If you want notifications
+for further videos, hit the subscribe button
+and I'll see you next time. 

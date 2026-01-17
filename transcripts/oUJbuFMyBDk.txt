@@ -1,0 +1,87 @@
+Hi everyone! Welcome to a new system design video which
+is on messaging queues. The example that we are taking is that of
+a standard pizza shop. In a normal pizza shop you must be seeing
+that there is somebody taking orders. When the pizzas are being made they don't
+stop taking orders, of course. They keep taking orders from the new clients. So multiple clients request for pizzas and
+they get their responses immediately like: "Please sit down" or "Can you come back after
+sometime?". So you relieve the client from expecting an
+immediate response by giving them a response which is not the pizza but a confirmation
+that the order has been placed. What you will need then is a list. A list which maintains order no. 1 order no. 2 and so on and so forth. Once you are maintaining this list, you note
+down the order. You start making pizzas. When the second client comes in you you can
+stop making the pizza, or if you have multiple people somebody takes the order and just adds
+it to the queue of making pizzas. If this is a queue of pizza orders. Pizza order 1, pizza order 2 and so on and
+so forth. That's being mirrored by the list. And while you're working on this pizza you
+can take as many add orders as you like. It's a simple architecture. And when you are done making a pizza you remove
+it from this queue, which also removes it from this queue. This might be the same queue itself. Once you remove it, you ask for the client
+to pay and the client sends you back some money. And now they're entirely relieved. But the special thing about this was that
+the whole thing is asynchronous. Meaning that they did not wait. You did not make the client wait for your
+response for the payment or for the pizza. What happens this is that the client was able
+to do other tasks during that time. They might be checking out their phone, they
+might be going out, it doesn't really matter. But you allowed the client to be happier to
+be distributing its resources elsewhere instead of just focusing on you. Similarly this allows you, as the pizza maker,
+to order your tasks according to your priority. There might be one pizza which has to be made
+immediately. There might be something which is very easy
+to do: like filling up a coke can. Maybe. So those orders can be put according to the
+priority. And so you are able to manipulate this queue
+according to the priority and allow clients to spend the time more judiciously just by
+using asynchronous processing. With this in mind, what could possibly happen? One really good scenario is that you become
+super successful and you have a chain. You have multiple outlets in your pizza shop,
+something like dominos. Let's say pizza shop no.1, pizza shop no.2
+and pizza shop no.3. Of course, each pizza shop has multiple clients
+connected to them. Assume the worst. Assume that one of these shops actually goes
+down: there's a power outage, could be anything. If it does go down then we need to get rid
+of all our takeaway orders. So that's easy: we just need to dump them. But the delivery orders can actually be sent
+to the other shops so they can complete those delivery orders. And you can still save some money in which
+case let's say pizza shop no.3 goes down. If it does, then the clients which are connected
+to it had some orders. Now they should be connected to these shops
+and their orders should be sent to them. How do you do this? Well, the simple way of maintaining a list
+in memory won't work because once the shop is down it loses electricity. The computer is going to shut down. You need some sort of persistence in your
+data. Which means you need a database. And this list has to be stored in that database. So in our new and slightly complicated architecture,
+what we are going to have is a set of serveres from 1 to 4. And we also have a database which is going
+to be storing the list of all orders that you have. So the order ID and the contents and 'is it
+done or not?'. Now let's say that the servers get orders. So this is containing order no. 3 order no. 8 or no. 20 and order no. 9. Now let's put some more over here which is
+order number 11. So 9 and 11 are being served by s3 and s3
+crashes. If that's the case, 9 and 11 need to be rerouted
+somewhere. But how do you do this one? One way is to check in the database which
+orders belong to s3. So you can note down the server ID which is
+actually handling the order every time it's making an entry but this is getting complicated
+so instead what you could do is have some sort of a notifier, so that will be somewhere
+over here, which is going to be checking for a heartbeat in each server. It talks to each server and asks them every
+15 seconds. What happens with that is, if a server does
+not respond, then the notifier assumes that server is dead. If it is dead, it can't handle orders and
+then it can query the database to find all of those orders which are not done. Once they are not done it picks those orders
+and distributes them to these three servers remaining servers. Problem! What if there is duplication? What if order no. 3 is not yet done and it's picked by the query
+in the database. So no.3 no.8 no.20 no.9 and no.11 are picked
+up, and then distributed. So order no. 3, let's say this time, goes to server no. 1. Server no. 2 already has order no. 3 and is processing it, and is going to end
+up making a pizza sending it to the same place as s1. And you have a big loss and lots of confusion. So one of the things you can do is go for
+some sort of load balancing. Now, the load balancing seems like sending
+the right amount of load to each server. But the principles of load balancing ensure
+that you do not have duplicates: duplicate requests to the same server. If you haven't checked out the video for load
+balancing I suggest you do because consistent hashing is one technique by which you can
+actually get rid of duplicates also. That principle itself will take care of two
+things: 1) Balancing the load
+2) Not sending duplicates to the same server Reason for that is because s1 is going to
+be handling a set of buckets. s2 is going to be handling a set of buckets. Once this server crashes s2 won't lose its
+buckets it'll only get new buckets added to it. s1 will also get new buckets added to it and
+therefore the third order will now come because they belong to s2 even now. Maybe the other orders of no.9 might come
+in and no.11 might come in here. So that's how it works! Okay...through load balancing and through
+some sort of a heartbeat mechanism, you can notify all the failed orders to the newer
+servers. Now what if you want all the features of assignment
+or notification, load balancing, a heartbeat and persistence in one thing? That would be a message queue. And for us it's not so much a message as a
+task queue. So what this does is it takes tasks, persists
+them, assigns them to the correct server and waits for them to complete. If it's taking too long for the server to
+give an acknowledgment, it feels that server is dead and then assigns it to the next server. So there are multiple strategies of course
+for assigning it. That is just like load balancing has multiple
+strategies, but that's all encapsulated by a task queue. And this is an important concept in system
+design: using messaging queues or task queues to get work done easily so that you can encapsulate
+all that complexity into just one thing. The pizza example is a little extreme because
+it does everything together. That's exactly what a pizza shop would want
+a: task queue, right? And an example of messaging queues is Rabbit
+MQ. There are some libraries like zeroMQ which
+allow you to write a messaging queue quite easily. There's JMS, which is Java Messaging Service. And then so on and so forth. I think Amazon also has a few messaging queues,
+but yeah, you can try out messaging queues. They are really good encapsulations for complexities
+in the server side. This is just a fundamental concept of system
+design: not really a system which has been designed. But yes, if you are going to make a pizza
+shop, it seems like a good idea. If you want to have some more discussion on
+this, let's have a discussion in the comments below. If you liked the video press 'like' button. If you want to subscribe for further system
+design notifications, please do so. I'll see you next time! 

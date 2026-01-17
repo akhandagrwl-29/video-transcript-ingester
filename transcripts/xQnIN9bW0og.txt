@@ -1,0 +1,373 @@
+Hi everyone. Today we'll be talking about where NoSQL
+databases can be used and why they're so popular. Yes, we will be talking about NoSQL databases
+and why they're the best in the world. And we are really excited about
+actually talking about this topic. Yes, there are a lot of scenarios
+where NoSQL databases are used. There're an equally high
+number of scenarios where
+NoSQL databases are not used. So it's important to know when to use
+them and when not to use them. Well, yes, whenever you're building toy apps
+that time you need your RDBMS, but whenever you need scale,
+it's NoSQL databases. Alright? That's not entirely true actually. It's not that scalability
+demands a NoSQL database. There are certain scenarios when these
+databases tend to do well and we'll be getting to them in this video.
+Could you give us an example? Well, YouTube doesn't use NoSQL databases.
+StackOverflow doesn't use NoSQL databases. Instagram doesn't use NoSQL databases.
+Whatsapp doesn't use NoSQL databases. WhatsApp doesn't have a database. Let's start with the video. So what is the difference
+between SQL and NoSQL? Well, if you have a look at the database
+schema that we have for an example of a person in which case they have an ID
+that's a user id, we have the name, address, age, and role. Now the
+address is a complicated object. So what I'm gonna be storing the way
+I'm gonna be storing it is in a separate table. The address ID 23
+corresponds to this row, which means that the address is Munich
+and in Germany and the district is blank. So you're seeing that there is some
+sort of foreign key mapping here, and that's how we store data in SQL.
+This is how you store it in NoSQL. You have the id 1, 2, 3, and you
+just have this big fat blob of data, right? This is j ss o n and the
+way it stores it is the column name maps to a value, which is name
+John Doe. The same thing over here. The address is no longer a foreign key. The address is another object within
+this object. So that is just J ss o, you know nesting, we have
+address id, city and country. And because there's a null
+value of district, we actually
+don't even store that. We have the age and the role also defined, and you are seeing that there's
+this big blob of data over here. So what makes NoSQL so efficient? The key is to think about how we
+are storing and retrieving data. When we are storing data, usually it's never like a user registers
+and they send their age later on or they send the role later on,
+or they send the address later on. It's all together. So when
+there is an insertion, there's usually all the
+fields inserted together, which means that this entire fad
+blob could have been written on the, on the a p i I mean when
+the request was coming in, all this information was there and you
+could have done this in a single insert. And whenever you are pulling
+out information about any user, usually you'll need all the
+information about that user, right? Select start is something. So common that people don't even think
+about adding the column names these days unless it's of course a
+very big table. Or if you, if you have some column which is
+pretty big and you want to avoid that, that's a separate scenario. But usually
+select star is very, very common. So because select star is so common and
+because you need all the data relevant to a user all the time, this means that this entire blob
+will also be pulled out all the time. So that means insertions and retrievals require the whole blob. So
+why not keep it together? You see when in your running
+query on the SQL database, usually the pointer comes to,
+let's say this id, this row, and then it has to sequentially
+read all these columns. Not just that you also don't have a
+clean way to denormalize things like this address could store the string, but this database is not inbuilt
+for denormalizing things. So you might need a join, which is pretty expensive considering
+that most of the times you'll need both data. It's cheaper here. And that's
+the first benefit of using NoSQL, right? All your data, relevant data
+is contained together in one block, and so it's, it's a little
+easier to insert retrieve. The second thing is that
+this schema is flexible. We saw that the district was
+null and for this SQL approach, what we had to do is we have to add a
+new column, although we don't need it, we still do it over here. What could
+happen is that if the address is null, if the address is entirely blank, that's fine because this blob
+doesn't care about schema. All it caress about is
+a j ss o n document. So they'll be named John Doe
+comma straightaway, age 30, and the role is st. So what you're seeing is that the schema
+is very flexible in this case and not so much over here. In fact, whenever
+you're doing a new attribute addition, let us say that we have some
+new attribute added over here, which is salary. So
+whenever salary is added, we have to actually add a new
+column to this SS Q L database, which is a very expensive operation
+because you need some sort of locks on the table. And it's also risky to
+maintain consistency at this time. So I mean, if you want to maintain
+consistency, then you need the locks. And that's the reason why it's
+expensive. While over here, if there's something that you're adding, which you don't need
+for all the older users, what you can do is just start adding
+them straight away. Because like I said, the schema doesn't care. The older schema doesn't know that
+there's anything called salary. Okay? So the second advantage is that
+schema is easily changeable. The third advantage of NoSQL databases
+is that they have horizontal partitioning inbuilt. Most of the times they
+expect a lot of scale to come in. I mean the users for these NoSQL
+databases expect a lot of scale. So what they tend to do is they
+horizontally partition this data. Now you can have a look at the sharding
+video to get a better understanding of horizontal partitioning. And of course, when it is allowing this
+kind of partitioning. It's more focused on availability,
+which is a good thing. A lot of systems actually require
+availability or consistency. Yeah, so that's the good thing built for scale. The fourth and final major advantage of
+NoSQL databases is that they're built for aggregations. Also, when a person
+is storing data in their NoSQL database, they're usually expecting to be getting
+some important information out of that data. For example, what is the
+average age? What is the total salary? These kind of databases are built for
+finding metrics and getting intelligent data. So that's what they're
+built for aggregations. Okay, so these are the advantages
+that we have of NoSQL databases. What are the disadvantages? Not too many updates are
+inherently supported in this. So if you have lots of updates,
+this is not really nice, what are the possible problems here?
+Well, the data may not be consistent, meaning that the two nodes may have
+different data for the same id. Yeah while this SS Q databases usually
+give you something called asset properties by which you can contain
+this issue. So that is a problem. So I'll just write it down.
+Consistency is a problem, which basically means
+asset is not guaranteed. If asset is not guaranteed, you can't
+have transactions using NoSQL databases. At least you can't have the same
+transaction properties of acid. Okay? So that's a big reason why
+financial systems don't use
+NoSQL databases for their transactions because it
+doesn't make much sense. The second problem is that these
+databases are not read optimized. If I ask you to find me, all the ages of all the employees
+that we have in the company, what's going to happen is it's
+going to go to these blocks, and each time it's going
+to read the entire block, then filter out the age
+and do that for every row, then return you the result.
+While in a SQL database, all you need to do is just come to this
+column. I mean, it won't be that easy. The reader has to actually go to that
+column and then read that column. But this is more efficient than this.
+So these are not read, optimized, read times are comparatively slower. The last two problems I can see here
+is that this does not have implicit information about relations. So in an
+R D B M S, the R stands for relation. Now 23, the address ID maps to this point, and what that tells you is that this
+row is somehow related to this row in across the two tables, right? While in NoSQL there's
+no easy way to do this. If you had a separate table for let's
+say the, all the values of the addresses, then the the information
+wouldn't be implicit. You couldn't force a constraint
+like a foreign key constraint, which would say that this column 23 can
+only exist if there is a corresponding column in the, in the employee
+table. So relations are not implicit. And the fourth and final problem,
+which is a major problem, is that joins are hard. If you
+have two nos tables, let's say, then when you're joining those two tables, what you need to do is you need to
+run through every block of data here, find that relevant column on which
+you're joining to the other guy who's relevant column you need
+to find again, of course, and then you need to merge them
+together. Joins are actually all manual, so to speak, in a NoSQL database. There's no intelligence
+behind these kind of joints. You can try to improve on them, but
+there's only so much you can do. While SQL databases are to some
+extent built for joins, yeah, inner join outer, join left out, join all the things that
+we didn't read in college. Those kind of things are very common
+when you're dealing with SQL databases because they have inherent
+relations in them. So these are the advantages and these
+are the disadvantages that we have of NoSQL. When do we
+actually use NoSQL? Well, it depends on these things of course. It depends on if your data is a
+block and if you are making few updates and you want to keep
+all of them together, like if, if you're finding something
+which has to be right optimized, there's a lot of rights coming into
+that, maybe NoSQL is the way to go. There are scenarios where you might want
+inherent redundancy or aggregations in the data, in which case NoSQL provides
+that for you in a really nice way. Of course, you can see all the disadvantages and
+that's one of the reasons why applications like YouTube or stack overflows
+still don't use NoSQL databases, but it's really nice and we are going
+to be taking example of Cassandra to understand these databases in detail. So this is the Cassandra architecture
+that we'll be talking about. The requests will be coming
+into this Cassandra cluster, which is going to have five nodes, and it's a pretty expensive thing to
+actually host a Cassandra cluster. It's going to be having request
+IDs distributed in this cluster. So any request between zero to hundred
+will be falling in node one between a hundred to 200 will fall in
+node two and so on and so forth. So there are five nodes and you can
+see that there's a request ID 1, 2, 3. So it should fall somewhere over here, or rather it should fall
+somewhere over here. So request IDs may not always be numeric. It might be a u U ID or it might be a
+person's name or something like that. So what we do is instead of thinking
+about IDs in NoSQL databases, often things are considered as keys. So have a look at the sharding video
+to get a better understanding of how these keys are mapped, but basically
+we just take the hash of 1, 2, 3. So it's passed through a hash
+function. This might be a string, this might be anything you
+like, and we get a value. So I'm gonna take that as 2 5 6. So this hash is then used
+to map this request to a particular node in this cluster. So 2 5 6 falls between 200 to
+300, so it falls over here, right? Or rather I should take it
+as any, any place that it falls. I'm gonna take the clockwise
+next node, so I'm gonna. Pick up four. So if the
+hash function is nice, meaning that it's uniformly distributed, what we can assume is that if there's
+a lot of requests which are coming in, then they'll be falling with equal
+probability in any of the nodes. So all the nodes should have approximately
+equal distribution 20% of the node. The advantage of this is that if you
+have a lot of requests coming in and you know you want to of course make sure
+that all of the nodes are being used to their full capacity. So because
+there's random distribution, all of them will be having equal load
+and they can actually go up to their full capacity instead of one node
+having too much pressure. When can one node have too much pressure
+when your hash function is not really nice? So let's say your hash function is that
+anything less than a hundred is equal to zero, and anything greater
+than a hundred is one. So what will happen is all
+requests greater than a hundred, which is from zero to 500, we said. So that's around 400 of the requests
+will fall in hash function one. So let's say it falls in two and the
+other requests fall in one and the rest of the nodes are not even
+touched. In this case, what's going to happen is the
+moment you hit your load for two, your entire cluster is going
+to be fully loaded, right? Because two is going to crash. So to
+what this, you need a good hash function, or if your hash function is bad and you
+can't change the hash function for some reason, maybe you can't do a
+hot change of the hash function. What you can do is you
+can do something like a two layer cluster where when
+the request goes to two, it doesn't actually store
+it in its in its database. Instead it sends it to another
+cluster which has five nodes and you pass a different, I mean, you run this request through a
+different hash function, so h of H dash, which gives you a different value.
+So this hash function sucks. This hash function can be really nice
+uniform distribution and therefore these five nodes will have
+approximately equal distribution. And using this technique
+of multi-level sharding, so to speak, just have a look at the
+sharding video, multi-level sharding, you should be able to survive. But of
+course this is not a very good idea. Why have multiple levels of
+hash function? Well, why not? If you are a user, let's say of
+Google Maps and you're in India, then maybe your, your hash function over here is
+hashing on the basis of country. So the country ID is the only
+thing that you're looking at. And based on country id, if
+you're sending it to one place, it's possible that one of the countries
+is going to have a tremendous amount of load for certain festivals. Let's say the
+valley, everyone is using Google Maps, everyone is going somewhere. What will end up happening is this
+node will have too much pressure. And in those cases, what you can
+do is go for multi load charting. Alright? So these are the major
+advantages of using a hash function. The, the thing that comes in very intuitively
+with the hash function is that you have a node where you are going to be
+sending the request, let's say to, and you also want to make sure that
+this data is persisted in a way that you don't lose the data if two goes down.
+So because this is important data, if two crashes, you don't want this
+data to be lost from the entire cluster. So you wanna make copies of it, you
+wanna make replicas of that data. Who do you choose to have those replicas? Because of this hashing concept, you can just ask three to also
+have a copy any node after two, if it falls on two, if
+the request falls on two, any node after that should have the
+copy. If the request falls on five, one should have the copy. You have
+two nodes which are storing the data, which means that the probability
+of you losing the data is lower. And also when a person is making a query, what you need to do is you need
+to hash it, hash this request, figure out where it falls, and any one
+of the replicas can actually answer. So if you're making two
+replicas, one or five can answer. If you're making three replicas, then five or one or two can
+answer and so on and so forth. So your read queries optimized your
+rights are also more guaranteed and it could also be optimized
+because if five misses the right, then you can just write it to one
+and still working. So through this, Cassandra gives us two
+features of load balancing. You can have a look and the
+description for a good link for this. It's a system design playlist video.
+And the second thing is redundancy. So redundancy or let's say replication,
+they're slightly different, but this gives you data guarantee
+and this gives you speed in reading. So because like we said, we are going to be distributing the
+reads and we are going to be making sure that the rights happen really well, we have both of these features
+in the Cassandra cluster. One of the very important concepts when
+it comes to NoSQL databases is the idea of distributed consensus. What I mean
+by that is that there are five nodes, and let's say the
+application factor is three. So if a request falls on five, then five one and two are
+going to be copying that data. They need some sort of mechanism to agree
+on a particular value to return to the user. Why is that the case?
+Well, let's say I write on five. So there is some data
+append here concurrently, I'm going to be writing on
+one and two also. However, let's assume that one and
+two are a little slow, so they actually haven't got the
+right yet. If that is the case, and I make a read operation now, so
+let's say I added my profile on five, I'm expecting one and two to have a two, I make a read operation on
+my profile and five crashes, nothing to worry about because one and
+two should be having all the data that five should. So I go to one
+and I ask for my profile. I see that it doesn't
+exist. One returns an error, the application now assumes
+that this profile doesn't exist. So it returns a user not found error. So I'll get confused that I just made
+my profile and why isn't there on the database toward these kind of issues. What Cassandra should be doing is
+returning a database error so that the application knows that there's something
+wrong in the database and tells the user that hey, the there's
+something wrong with our database. Wait for some time. Okay? So to do that, what we need is some sort
+of distributed consensus. And one of the ways to
+achieve this is quorum. Okay? Quorum is a way in which multiple nodes
+who are related to a particular query accept a particular value or they, they come upon or decide or vote for a
+particular value. What I mean by that, let's say five day crash, we went to
+one, one said, I don't have this data, and two said I have this data, let's
+say the concurrent writer happened. If that is the case, I will be picking
+up the data with the latest timestamp, okay? The version id, the
+timestamp, whatever you like to say, and returning that to
+the user. In this way, the user is happy that their
+profile is created. However, let's assume that even two does
+not have the profile created yet. In this case, both of them will agree
+that there is no profile created and unfortunately the user will be
+given a no user profile found. If the current value is equal to two
+and the replication factor is equal to three, that means that if
+two of the three nodes, which means a majority of the
+nodes accept a particular value, then we take that to be the truth.
+So in this case, unfortunately, if one and two both don't have
+the rights replicated on them that will result in a wrong
+error sent to the user. So do we mind this little
+bit? But this is really rare. The possibility of five
+crashing and one and two, not having the rights before they
+get a read operation is really rare. So this is a risk that we are willing
+to take when you're taking a NoSQL database and just move forward with
+availability instead of consistency. But what are the other
+good scenarios? I mean, the other good scenarios are that one
+has it, the timestamp is more relevant, so two's data won't be taken. Finally, maybe both of them have it. Why don't
+we become optimists as engineers? So that would also result in
+the correct data being returned. And that's the reason why
+quorum is an important concept. What it allows you to do is take a risk, but in most cases it is correct, right? A column of two is
+highly unlikely to fail. What if I make it a column of three, like three nodes have to agree with a
+replication factor of three. In this case, this query will fail
+because five has failed. You need three nodes to agree on a
+particular value. One and two don't agree. I mean one and two will
+return a particular value, but five is not returning a value
+and therefore the query fails. I'm also taking a special case where
+I'm picking up the latest timestamp. If the quorum factor is
+equal to two, it's very, very likely that unless both
+of them agree on some value, you're going to fail the query. Okay? I have taken timestamp because in this
+case it clearly shows that you can still work around with, you know,
+one and one, one versus one. Basically there's no majority, but most of the times it's going
+to be they don't agree on a value. Just fail the database query and tell
+the user that we are unavailable for some time for your particular quest. Now, if you want the details
+of how a quorum work, I'll be taking a video on this a little
+later. It's distributed consensus. So there'll be pack source, there'll be the gossip protocol but in
+general you can just assume them to be sending all their information
+to a central server. Yeah, let's say three is the person
+who they all send information to, and three then counts the words and then
+chooses one value and returns it to the user. Now, what happens if three fails?
+That's a master so to speak. In this, in this cluster there's this weird
+consensus that we'll be doing in the, in the future video. So
+that should answer that. The final way in which Cassandra
+stands out as NoSQL database, even Elasticsearch has this feature, is the way in which it stores data
+and the way in which it writes data. So if you have a request
+coming into Cassandra and
+you have this key value pair, assume this stable to be
+existing in memory, right? Because you need to write it somewhere. So Cassandra will be storing
+all of these records in memory as a log file, okay? The reason I'm calling it a log file is
+that whenever there's a request for some write, it's going to be writing
+in a sequential fashion. So if a new request comes in, it
+goes to the next point, new request. Next point in this way, you are actually
+storing all the data like a log. This is efficient because all you need
+to do is go to the point where you have the current pointer and just write down
+the data instead of searching anything. Okay? So this is fast and
+periodically this memory is dumped into something called an ssss
+table. So sorted string table. Why is it sorted string? Because the
+key is sorted in this string table. So if I have some data over here, so the key is going to be sorted
+and the values are going to be per key. Now this is persistent storage, which means that it's gonna be
+stored in one of these cluster nodes. This concept comes from a
+very famous Google paper, which is the big table data
+structure that Google made. You can have a look in
+the description below, but the special thing about sorted string
+table is that it is immutable, right? So this data's not gonna
+change. It is immutable. So every time Cassandra has
+some data in its memory, it flushes it into a
+new sorted string table. Now you can imagine that because these
+requests are coming in after a few days, what's going to happen is you're going
+to have a lot of sorted string tables all over your cluster, and these are going
+to be taking up a lot of space. Why? Because any update, let's say the key is one to three and
+two days later you got an update on that key one to three. So some
+data in that has changed. Maybe the name has changed from John
+Doe to the middle name has been added. So in this case, what's happening
+is you have an update on that key. The latest record is this record. It's in some other sorted
+string table because, because that was created later on
+when it was flushed to the s S T. And effectively what has happened is you
+have multiple records for the same key, right? If you have multiple records
+for the same key, it's not a problem. The thing is you can
+always use a timestamp. This record will have a timestamp and
+you can use the latest timestamp to get the data. The problem is not consistency. The problem is data usage. Like you are going to be using a lot of
+storage in with these duplicate keys. So if you have 10
+records for the same key, then you are using 10
+times the storage required. So Cassandra Elastic Search provide
+a feature called compaction. What we do is we take different sorted
+string tables and we merge them. So you can imagine this
+to be a merge sort. Yeah, you have two sorted areas
+and you're just merging them. So this is an Order N
+operation and it's also the space complexity is the minimum
+of M and n where the size of the two areas is m and n. I have actually taken this
+extensively in the Tim Sort video, which nobody saw . If you
+just want to know how this works, it's just the MERT algorithm. If you want a detailed explanation
+of why the space complexity is solo, you can have a look in the description
+below for the Tim Sort video. So that's the important thing.
+Basically, we have sorted string tables, which are immutable, so they're
+really fast to flush into disc. You don't need to worry about whether
+they are duplicate keys or anything. And later on, like a batch process, you are going to be compacting
+these sss tables to to optimize for space. How do you get
+rid of deleted records? Well, you can go to the deleted record and yeah, Cassandra calls it a tombstone.
+So you place a tombstone, you probably set a flag, and the tombstone
+says that this record is dead. Yeah, any read operation on that, if there are three or four
+records and there's a tombstone, so you see tombstone on
+the latest timestamp, you call this record to be dead
+and all three of them are killed. If there's an update on that key,
+again, if you see a tombstone, then you know that an update is impossible
+and therefore you fire an exception like record doesn't exist. So in general,
+this is how NoSQL databases work. We have picked up a example
+of Cassandra specifically, but there's a lot of concepts that are
+actually extensible to Elastic Search, extensible to Amazon Dynamo
+db and so on and so forth. There's a lot to digest over here, and
+if you have any doubts or suggestions, then you can leave them in the
+comments below. If you like this video, then hit the like button. And if
+you want notifications, so further, such videos, hit the subscribe
+button. I'll see you next time. 

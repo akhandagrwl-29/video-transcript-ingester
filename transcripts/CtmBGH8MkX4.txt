@@ -1,0 +1,112 @@
+Hi everyone. We are talking about five do's and
+don'ts for system design interviews. Now these tips are very useful if you
+have your system design interviews coming up soon or if you're just practicing and
+you want the maximum amount from each practice session. Now, the first system design interview
+tip that I would like to give you is do not go into detail prematurely. This happens very often when you are
+drawing services and databases and you know, clients that are going to be connecting
+to these people get into one part of the system and go into very, very
+deep detail. For example, if I look at the client and I say
+that I'm going be connecting to these services, sometimes
+people say that, alright, there's going to be a gateway
+here. Is this too much detail? Maybe not, but this is, I'm gonna be using the
+HTTP protocol gateway. . What's going to happen with this kind
+of a flow is that you are going to be talking all the time, and that's not what
+you want in a system design interview. You are gonna be talking for
+the majority of the time, but you want the interviewer to
+be giving feedback very often. What happens with this is that when
+you go into detail and you take a flow, which is not what the interviewer
+wants, they won't even stop you. They'll just let you run along.
+And once you make the mistake, you'll need to backtrack. And that's
+not just wasting time in your interview. That's also a negative point
+because in the real world, if you did this and you have to backtrack
+that, that would cost money, right? So avoid this point. It's very important that you
+do not get into detail until, and unless you're sure or you
+have asked that, what should I do? So a good way to actually talk about the
+same thing is I'm gonna be talking to all my services using a gateway.
+Yeah, this is reasonable. Wait for one second, wait for a response, and then say it's going to be talking
+to this service using a protocol. I prefer H G T P because it's widely used, and so the clients don't need to do
+something. But again, take that pause. If there's something
+important, it'll come up. Maybe the interview will direct you. If you're going to be talking about
+databases and they want details, mostly they're gonna be talking about
+drawing an entity relation diagram. So you, you'll be
+defining your tables well. So that's how you go into detail. You, you wait for some time and you
+actually look for the first point which needs detail for the
+system to be defined better. Now for the second point, the second point is that don't
+have a set architecture in mind. If you have something already
+thought out, you know, you have read some blog which says that
+this is a really good architecture, maybe MVC maybe event driven,
+and you just say that, okay, I'm going to be having this
+architecture and I don't care about the requirements, I'm somehow going
+to fit the requirements into the, into the system. So if I'm a fan of
+publisher subscriber models and I say, there's gonna be a publisher
+and subscriber here, which is the only way that services
+are going to be talking to each other, maybe it's not the best
+for the given scenario. So if you're doing this again, what could happen is the interior
+might take it among upon themselves to actually break this architecture
+somehow. So the requirements may change. In fact, very often that's,
+that's the thing that is done. It's to test your flexibility when you
+have something which you feel is really good, and they throw requirements
+which are completely different. So don't have a very set
+architecture in mind. It happens often when we don't have
+time for system design interviews. We are just reading all blog posts and
+we see something really good and feel like, yeah, this, this is gonna fit
+everywhere. That's not the case. You know, WhatsApp and Uber have very
+different architectures. The third one is actually a KISS, which is very famous amongst
+programmers. It's keep it simple, stupid. You don't want to pick up one
+point of the service and just go on, you know, getting into more
+and more detail about this service. Like I'm going to have maybe I'm going to have a heartbeat, which is
+gonna be talking to this specifically. I'm also going to be having
+another database for analytics for this service. You know,
+more and more you get into this specific portion of the architecture,
+the more and more narrow your view is. So what I would suggest is
+take a step back often enough, just take a step back and have a
+look at the entire architecture. Maybe some of the things that you're
+doing here, maybe the heartbeat, maybe the analytics can be
+extended to the entire system. And very often what happens is if you, if you have a look at the DI
+diagram that you're drawing, and if you see one part
+of the system, you know, huge  and the other one's all
+tiny thin, then it's a good idea. It's a good indicator
+that maybe your system, either it needs change or it
+needs to become more simplified. You can extract out components from one
+part and extend them to the other bits. The fourth point is probably the most
+common mistake made in system design interviews, and that is to make
+points without justifications. If you have nothing backing up
+what you just said, for example, I, I say that the database is going to
+be a NoSQL database and I go even more concrete and say it's Cassandra.
+One logical question is, why, why do you want
+that? And many of us in, in these interviews, we
+feel the need to speak. We feel the need to actually make
+points continuously because it's, it's awkward. The silence that is between you explaining
+and the interviewer evaluating that is very awkward. So you might make
+a half-hearted comment on, Hey, I can use Cassandra here. Or you might
+feel like, Hey, Cassandra's really cool. So why not just add that to the system?
+Be sure about what you're speaking. If this Cassandra database is not
+going to be working well here, that's going be a negative point
+and that's gonna be against you. So a wide speaking, without
+thinking the points through, the final point is to be aware of
+current technologies with this. What happens is if you draw a part
+of your system, which is for example, the database, you can actually name the technology
+you're using in that database. So for example, if I say I'm going
+to be using a NoSQL database, and we have already said, Cassandra, you can also use Amazon Dynamo
+DB and so on and so forth. What about a relational database,
+which is not like a NoSQL database? I can use MySQL, I can use Postgres. Another thing that you might use
+for load balancing is elastic load balancer. So you might use the Amazon architecture
+to give you this for heartbeats. You might use zookeeper for this
+message queue, you might use RabbitMQ, so on and so forth. But me
+being aware of these databases, these off the shelf solutions shows that
+I'm knowledgeable and I will probably take lesser time and lesser testing
+to implement my entire feature. So these are the five important do's and
+don'ts for your system Design interview are three pillars that I see our system
+design interview standing on are the first one being clarity of thought. So if you can express yourself
+clearly to your interviewer, you can do the same with your
+teammates. And that's a big plus point. The second one is flexibility. We talked about don't be stuck
+with one architecture and you know, roll with the punches. So flexibility is important
+when you are designing a system, system design interview. And
+the final pillar is knowledge. If you're aware of what's going on around
+the world and you're able to design a system successfully, then the system
+design interview is a success. So remember the five do's and Don's
+that we have discussed over here, and I'll be seeing you next time. That's about actually designing
+a system from scratch. So we are gonna be picking up
+something and building it from scratch. If you want notifications
+for that, you can subscribe. And if you like this video, hit the
+like button. I'll see you next time. 

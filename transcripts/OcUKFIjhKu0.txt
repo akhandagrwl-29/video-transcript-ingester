@@ -1,0 +1,291 @@
+Today, we are talking about
+location based databases. And this is a very interesting topic to
+me because there's a lot of applications in the real world: Like Google maps,
+like Swiggy, like taxi sharing services, which use location based databases. One of the early attempts at searching
+locations quickly is to assign codes for every location. In India,
+you call it pin codes. It's I think inspired by the
+concept of zip codes in the US. Using this zip code, you can assign every location in your
+country to a particular post office. This system is useful, but
+it has a set of problems. I'll take a real life example. I had
+ordered food from a food delivery app, which had the restaurant
+in the pincode 400051. And I happened to be
+in the location 400050. Now there was a train line separating us. Although the pincode
+seems really close by, the crossing had to be
+taken two kilometers away. What ended up happening is that the
+delivery executive had to travel a lot and deliver food to me late. So we want our system to be able to
+measure the distance between any two given points. That's the very first requirement. To do this, you need
+some sort of uniformity. You need some sort of consistency in
+the way that you represent these places. Uniformity in the way that you are
+assigning numbers to every location. This will come through uniform assignment. Another requirement is that I want to
+be able to break this region arbitrarily into smaller and smaller regions. That would be a scalable system. Scalable in the sense that
+the granularity is scalable. I want to be able to measure
+distance for that I need this sort of representation. That satisfies
+these two requirements. What's the other common use case that
+we have for location based databases. I'm standing over here, tell me all
+the users who are within 10 kilometers. You want to find out all the people
+close to you. So that means proximity. These are the only two requirements that
+we have as of now in our location based database. It can get a lot more complicated if we
+start actually adding in polygons and intersections, but this is a good
+place to start. Let's think about it. You can think about
+coordinates. That makes sense. Like you have the world map laid
+out as a 2-D map in front of you, and you want to find the
+coordinate of any point. You have that as the
+latitude and longitude. And now if you want to measure the
+distance, that was a very first, like, sub requirement we had. You need to be able to measure
+distances between two points. You take the lat-long, lat-long and then you find the Euclidean
+distance with the simple Euclidean formula. The other two sub requirements that we
+have are also satisfied because this granularity is scalable. You can add more decimal points to the
+latitude and longitude and go all the way down to nanometers, technically.
+Just using this representation. The problem is the second requirement,
+which is proximity. How do you tell, given a point, which are
+the other nearby points? This is not easy to answer. Because if you're going to go through
+all the points in your database, potentially all the points
+that you have in the world, which are in your database, and you're going to be checking each
+of them for the Euclidean distance, that is going to be a very long
+operation. It's too expensive. To store a point in the database, we first need to think about
+how do we represent this point. Take a normal number, let's say 5.685. 685 is three decimal places. And if you want the fourth decimal place, you need to allocate more memory for
+this number. Of course, in the computer, you know, you have fixed amount of
+memory, let's say 32 bits or 64 bits. But what's happening is that every
+data type that you're going to use has limited accuracy. So what this data is actually
+representing is a range of numbers, not the exact number. If you take
+10/3 and try to store it on a 32 bit, let's say double value or a float value, what's going to happen is there's
+going to be some inaccuracy. So there's a small error range that
+you have where your actual number lies. You can think of this as a way
+to find a small range of numbers. Whenever you define a binary
+number on the number line, you're doing a binary search
+using the bits of this number. Whenever you're getting a
+zero, except for the MSB, you're heading to the lefthand side. Whenever you're getting a one you're
+heading to the right hand side. And finally you'd be left
+with a very small range. Depending on the total
+number of bits you have, your error range will
+be smaller and smaller. We can use this to represent points
+also. So if you're going to use 64 bits, you can actually half it and use 32 bits
+for the X axis and 32 bits for the Y axis. And they're going to
+have some error in them. So effectively that error area that you
+have is where your location needs to lie. If you have the whole
+world over here in the map, and I'm just going to give
+you two bits instead of 32, I'm giving you two bits over here.
+Basically you can take values from 0 to 3. Effectively the x-axis has
+been partitioned into four
+pieces. That is 1, 2, 3, and 4 of equal size. You can see that
+each of these partitions is huge. They can actually contain entire
+continents in this. And similarly, Y axis, if I give it each massive region can be
+represented using these two numbers, but you're seeing that the
+accuracy is really low. Each region is pretty big in the world.
+If I increase the number of bits, what I'm doing is I'm making
+it more and more precise. So this is a good way
+to represent because, if I'm not too sure about
+the region I'm searching for, I can narrow it down by just using
+the first three or four bits. If I want to talk about
+the region in India, maybe with 6 bits I can represent where
+India exists in the X axis. And again, in the Y axis, I can do that. And then I can get all the users in this
+entire region by just specifying six bits. Our representation is now fine, but let's try to think about how do we
+search for numbers in the 2-D plane. In 1-D binary search, we were using every bit of the number to
+decide whether we are going to the left or the right. Now we have two numbers and each
+decision has to be based on both the numbers. So what we're going to do is we are
+going to look at the first bit in the X axis. So 10 has its very first
+bit, which is going to be zero. So that is on the positive
+side. First bit of the Y-axis, 3 again has zero. So it's on the upside
+instead of the downside in the Y axis. Similarly, you have 32 bits
+for X and 32 bits for Y. Every time you take one
+bit from the X and Y axis, it's going to give you one
+of the four possibilities, which is basically heading to one of
+the quadrants, whether it is upper left, upper right, lower, left, or lower
+right. In terms of proximity, if I have two points and
+they are quite similar, like their first 13 MSBs are
+the same. What can I say? Those numbers are close by. You can
+imagine that if I have these numbers. Then these 2 numbers
+are close to each other. And the reason I can say that is because
+the prefix of these numbers is pretty close. Every two bits are defining some region
+in the quad that we are looking at, and therefore it will be close. So proximity using this
+representation also seems good. One caveat here is that, what
+if there's a point right here, and there's a point right here? Basically these two are very close to
+each other. So the proximity is high, but you lie in this quadrant
+and this lies over here. Let's say 10 and this has the number 01. There's a big mismatch in
+the very first quadrant. But actually the proximity is really high.
+Using this representation of numbers, let's build a data structure which will
+help us search for locations on a 2-D plane. Now let's talk about this
+data structure called the quad tree. The QuadTree is quite simple to understand
+if you know about a binary search tree. It's very similar to that.
+Except that it works on 2 dimensions. And as we spoke, 2 dimensions require you to have 4
+branches to distinctly identify 1 node. So initially you have the whole world
+being represented over here at the root. This node is going to be containing
+1/4th of the entire region. So that is a sub region. Also important to know is
+that this tree is recursive. The 20 points over here might
+be distributed in the top right having five points, the top
+left having three points, the bottom left having just one
+point and the rest of the 11 points on the bottom right. So what you're seeing is that we have
+effectively broken down the entire world into regions. And how far
+do we need to go? Well, as far as our application requires,
+so if you require it to be cities, then maybe the entire city of Mumbai,
+all the users in Mumbai is fine. You can have it in the quad tree. You will actually break it
+down to one kilometer radius. Radius is strange to say in a square, but if the square is of side
+one kilometer in the quad tree, then this is good enough for you.
+And that will be your leaf node. Another thing you can do, which
+is far more sensible honestly, is that you split this quad
+tree only when required. The number of users in this sub tree
+has to exceed a particular threshold. If that is 10, here, then this
+will be split into smaller pieces. Of course you are seeing that there
+is a worst case scenario, which is: there's a lot of skew. Let's say
+the population of Mumbai is really, really huge. And a city in Iceland
+is going to have very few users. You will have this quad tree really
+skewed and going really deep in one branch while the other branches are really light. So there are certain limitations for
+using a quad tree or an R-tree when you're using location-based databases.
+And the main reason for this, that I can see is that
+when you take a 2-D plane, you don't have algorithms which are
+really efficient at finding out which points lie in this range. So a range
+query in a 2-D plane is a problem. But the strange thing is
+that we understand range
+queries really well in a 1-D plane. Look at interval
+trees or segment trees. On a 1-D line, they give us
+tremendously good time complexities, especially the search time complexity. That is just log(N) over here. If somehow we could take this 2-D
+plane and convert it into a 1-D line, then we had a solved problem. We
+can solve our problems very quickly. But how do we do that? How do we take a
+2-D plane and convert it into 1-D line? And this is where the idea probably
+comes from computer graphics. I'm not too sure about this,
+but have a look at Fractals. The interesting thing about fractals
+is that they have fractional dimensions. Very interesting, like 2.3 D. So it's not 2-D, it's not 3-D. It's 2.3D. And have a look at
+3Blue1Brown's video on fractals. It's very interesting. It's sort
+of, you are not, you're not 2D. You have sort of an extra dimension, but you're very constrained when
+you're moving in that extra dimension. So you're not at 3D because
+you're so constrained that you're, you're lesser than 3d, but
+you're definitely not 2-D either. So our purpose is to
+convert this 2-D plane into a 1-D line using something
+which is inspired by fractals. And that is basically you,
+you have this space, right? You have this 2-D plane.
+We talked about quadrants. This quadrant has to be
+filled in with this line. So you can fill the line this way. So
+this is creating this, 'U' kind of shape, right? You can also fill
+the line in different ways. You can fill it in this way. This
+creates a 'Z' kind of a shape, and you can fill the line in this
+way. It can fill an 'N' kind of ship. So I'm touching each point just
+once. Each quadrant, just once. So taking this step by step, you have a
+two2-D plane, which is shown over here. And what you want to do is you want to
+be able to do range queries on top of this. But we said that we can't do range queries
+efficiently on a 2-D data structure. So instead if we could take
+a line, a straight line. The good thing about the straight line
+is that we can do range queries on this straight line efficiently. A 1-D line gives us
+efficient range queries. Now, if we can squeeze this
+line into the 2-D space. What we are attempting to
+do is find points in close proximity by querying the 1-D line. If you don't know what segment trees
+have a look at that in the description below, it's a pretty good
+data structure to know about. You can also read upon interval trees.
+They're also pretty interesting. But the important thing is I'm able to
+answer queries like this efficiently on a 1-D plane. And so I can answer for
+proximity on the 1-D line, not on a 2-D plane, on
+a 1-D line efficiently. I need to somehow take this
+line and preserve the proximity information in the 2-D plane also. Okay. I need to squeeze this here and somehow
+preserve the proximity information. That is the idea. What are the ways in which I can
+squeeze this line on that 2-D plane? We have four slots and four numbers.
+If we don't care about ordering, then we can fix 1 number to 1 slot. So I'm just going to take
+zero over here and fix it. That's the first digit always. Now 1, I don't care about whether it
+goes to my right or it goes down. It's just mirror images. So
+one will always go the right. After one comes here,
+you have two options. Either you pick the diagonal and then
+here, so that would be two, three. Or 0-1, and you didn't take
+the diagonal, you went down. So 2 and 3. Is there any
+other representation? Yes. After 0, you can have 2 over here and
+you can't have 1 over here. So it has to be 3. So let's
+just draw these three out. First one is zero one, two, three. So this is called a Z curve. This
+has some practical applications. We are not going to be using it,
+but it's a pretty interesting curve. You can have a look in the
+description. Zero one, two, three. This is the star of the
+show. It's called the Hilbert curve. And this is what we will
+be using in this video. Okay. And the final one, I think
+is a complete clown. Which is zero, one goes over here, two goes over here and three
+goes over here. So this is, I don't know what it's called, but it's
+like an alpha shape. So alpha curve. This is a bad idea. Because I don't think you
+can fit this well in a 2-D plane and still have
+proximity information. You draw a really long
+curve to fit this 2-D space. And the longer curve you draw, usually the worse proximity
+information loss you have. Over here you have minimum
+loss of information. So the Hilbert curve seems
+to make the most sense. And that's what we'll
+be going forward with. Now that we have decided the arrangement
+of our line segment what's going to happen is we are going to be taking our
+line segment and breaking it into four pieces. The first one,
+which is this segment, zero is going to be over
+here in this quadrant. The second one is going to be over here, the thrid one here and the fourth
+one here. So three maps to three. These are four sections on the line
+segment being squeezed into these parts. We said that we should. Be having some sort of
+scalable granularity. Meaning that we can zoom in to the
+zone that we are searching for. So how is this actually helping?
+Because it just has four sections. What if I want more sections?
+The thing is recursive. Yeah. So you take zero. The 0th quadrant and you can break
+this into sub parts of zero one, two, three again. So what this will do is it will take
+this line segment and break it into four parts. This is segment zero,
+segment one, segment two, and segment three within
+the overall segment of zero. And of course you can go on
+breaking them into smaller segments. So it's an infinite thing. It's a recursive process by which you can
+go to any arbitrary depth because your line segment is continuous and you're
+filling this curve using this line segment. The tricky
+bit of course, is that, how do you make this a continuous
+line? If you have a look at this, this is what you're getting. Like the,
+the first quadrant has a U in itself. And then you have something like this.
+So this is not continuous, right? Because there's a disjoint part over here. You need some way to squeeze
+the line in a way that it keeps heading straight forward. The hilbert curve has. A very interesting property in which it
+can fill the entire space infinitely. So at the first level you have the zero
+one, two, three forming a 'U' ship. And at the second level, what you're going to do is break every
+quadrant into four more quadrants. That's the recursive bit.
+And this figuration is fixed. So when you're breaking down this
+Hilbert curve into smaller and smaller quadrants, what happens is both right quadrants
+will have the 'U' shape facing leftwards. Initially you had one single
+big U-shape facing left. Now you have two smaller ones facing
+left on the right quadrants and the upper left one has the 'U' in
+the right position. I mean, that's how we write it in English. And the bottom left one has
+it in the inverted position. You're seeing these U shapes
+in different rotations, but the quadrants are still being
+connected by the level one shape. So you can see that these extreme points
+of each 'U' shape are being connected. Using the blue lines.
+That is the first level. And the red line is
+actually the second level. This recursive shape is far more elaborate
+and also covers more space than the level one shape. Taking it to level 3. You remember that the first quadrant
+has the U shape in the correct way, the English way. Now these two use will be copied
+for its own right side quadrants. As you can see, like we
+made to 'U's over there. Then we draw the two opposing 'U's
+for the upper quadrants. Similarly, we can draw for every quadrant
+in this level 3 diagram. Now the green ones are done.
+So level three is done. The red connectors are for level two and
+the blue connectors are for level one. It is far more elaborate. It's
+covering a lot more space. And therefore it's very likely that
+your point actually exists here, but it doesn't need to exist at level 3. It can exist at any level because this
+can go all the way down to infinity. That's the special thing
+about a Hilbert curve. It's completely covering this space
+because it's an infinite line. Look at position 29. It's
+touching the green line. If I want to find the points having
+good proximity with 29, I do a ±6. 6 is arbitrary number. You can use
+any random threshold, but with ±6, I get 23 to 34. And you can
+see that this forms a range. This is a region which is contiguous. I can tell the points which
+are in close proximity to 29. Also the deeper levels you get to
+the more accurate this will be. So if you have a customer,
+let's say at position 29, and you need to find all
+delivery agents nearby, all you need to do is do a ±threshold, and you should have people
+in close proximity. However, there are some edge cases here.
+Also take the number 18 and 29. This has a difference of 11, but you can see that they're extremely
+close to each other in this plane. Like I said, if you take
+it to a deeper level, if you go deeper and deeper
+into the Hilbert curve, then you should find these
+points, rarer and rarer. But it could happen that you have a
+threshold, which is, let's say 10, and these two points are considered not
+close by, although they are. Conversely, you have 40, which is
+also at a distance of 11, which is very far and is
+currently out of the threshold. But if you try to compensate
+by taking the threshold as 11, so that 18 is close by, you're also
+going to be taking points like 40, which are very far. So setting the
+threshold is a problem here. However, in most practical scenarios, you're
+looking for proximity in a general sense. You're not looking for exactness.
+So this seems to work fine. All points in the 2-D plane are
+going to be having the Hilbert curve, passing through them because
+you can go to infinite depth. This is going to be completely filling
+the space using this recursive procedure. So any point has a representation, has a mapping on your
+straight line over here. And so if you have this point
+and you have this point, let's say mapping over here, you can find the approximate
+proximity of these two points. The idea of using a 1-D line
+to fill in a 2-D plane is amazing. With this you are able to
+make efficient range queries. A lot of apps become possible.
+Food delivery apps become possible. Taxi hailing services become possible. If you're looking for applications
+for location based databases, I have a video coming up on my course. It's probably going to be
+on a food delivery app, or it's going to be on a dating app. Like, find out nearby people
+in this given range. If you have any doubts
+or suggestions on this, you can leave them in the comments below. And if you want notifications for
+future videos, hit the subscribe button. I'll see you next time! 

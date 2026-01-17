@@ -1,0 +1,339 @@
+Hi everyone. This is GKCS! Today's
+topic is a very important one. It comes up often in distributed
+systems and it's called consistency. So consistency is usually related to data. That's what we'll be looking at today.
+And you'll hear this topic come up often, whether it's the cap theorem,
+but C stands for consistency, or you might have heard it in
+transactions. Database transactions. C again stands for consistency.
+So what is consistency? Well, if you have multiple copies of data, those two data pieces should match each
+other. The content should be the same. That's the general idea. Let's
+take a simple example. Initially, let's take Facebook in their initial days. So we are in the Harvard campus right now, and we have a single server and
+we have a single copy of data, which different students from
+all over campus connect to. Now, the idea is that if
+a user creates a profile, then the database system that we have,
+whether it's a database or a file system, doesn't matter, but a single copy of data. So this profile will be
+created in this space. And if another user wants to
+actually see this profile, so there is user A and user
+B. B wants to see his profile profile. B has been created
+over here. When B says, get me profile A, all you need to do in the server
+is to check your database, check for profile A and return that
+as a response. So this is perfect. It's giving the right
+information. What's the problem. The problem is that you
+have a single server, which means that this is
+a single point of failure. What if there's a network outage,
+whatever (tsunami hits the server), you're going to lose all the data.
+And even if that doesn't happen, even if you have something like a
+power loss, then your system is down. So that's a problem. And that's
+called a single point of failure. You just need one strike to take out
+your entire system. Facebook is out, but these are the initial days.
+So maybe it's fine. Um, what, what else are the problems? The second problem is that you might
+have a lot of users coming here, so you might need to scale the server. But up to what point do you
+scale this over? I mean, how many boxes do buy for a single box? If you increase the capacity of the
+server up to what point do you go soon enough, you'll hit
+the supercomputer range. So that's going to cost you a lot. It's not like you can get super
+computers at the supermarket. So the cost of vertical scaling is going to be high. And
+after a certain point in time, it's actually going to hit a limit. You cannot handle that many
+users in a single computer. The third one is that you might have
+multiple users from various parts of the world connecting to this database. So today was open for Harvard
+tomorrow it's open for Oxford. So that's on the other, other continent.
+And for them to actually connect this, this database takes a lot of time.
+So the latency here is very high. That's, let's say about 100
+milliseconds. You want to cut this down? You want to bring it
+down to 10 milliseconds. It's impossible because the amount of
+time it would take to hop from the Oxford sobered through the routers, and finally hit this Howard server is
+going to be something there's something like latency. This is
+highly latency. Okay. So how do we mitigate these problems
+with the single silver? We cannot, because we are, we have seen that
+there's a vertical scaling limit, so we'll probably need to
+add more servers. And that's, I think exactly what Facebook
+did. Let's have two servers, one in Harvard and one in Oxford. So this is the Harvard
+server and this is the Oxford silver. Okay. And there's no
+communication between them. That's that's exactly what Facebook did. They didn't have any communication
+between these servers. They just had data copies
+relevant to the students here. So all the Harvard students would connect
+here and all the Oxford students would connect here. And then they would
+be able to see each other's data, but only limited to the campus
+that they belong to. Of course, there's a problem here.
+There's no data sharing. So what makes Facebook Facebook is that
+you're able to share data and that's not happening right now. There's
+no way to share that data. Uh, why would you choose this? Well, you might choose product wise that
+people don't care about sharing the data. Maybe this is all about events
+in that particular campus. So there's no way a Harvard person
+is going to go that distance. But eventually this is not going to be
+good enough. You will need to share data. And that's where the problem comes in. Let's say we try to avoid this
+problem as much as possible. We say that if you need any kind of
+Oxford data as a Harvard student, you connect to this server,
+cross continental that's okay, but you connect to it. We are not going to keep any data
+belonging to Oxford in any other region. That's one way to start, but the older
+problems are still alive. For example, if the Oxford server goes down, then
+it's still a single point of failure. The other thing is that latency, if a Harvard student needs to
+connect to an Oxford server, it needs to go all the way from the us to UK, which is going to take
+time. So latency is still bad. The single point of failure
+is still real. Um, what else? Cost of vertical scaling. Well,
+yeah, you can argue that, uh, the, the number of Oxford students can
+become huge, but, uh, that's not, that's not really a concern anymore. So we have kind of solved this
+use case by spreading our data, according to where it belongs, but we still have problems with
+latency and single point of failure. So what can we do well to reduce latency? We can kind of cash
+some of the information, Some of the Oxford information
+right here in the Harvard solver. So maybe there are some popular profiles
+that you want to see on Facebook from Oxford. Well, you have it
+cashed here in Harvard. So you fetch it once and then you cash
+it here and then you keep getting a response back. So the way it's going to happen is instead
+of connecting directly to the Oxford server, you actually talk
+to the Harvard solver. The Harvard server sees that does
+this profile exist in my cash? The one that you're
+calling for, get it, uh, assume that this profile does
+not exist. Uh, and it is, it is found in the Oxford server. So you mentioned that in the
+request to get a from Oxford. Okay. And then it actually
+sends a request to the server, which gives back a
+response with the profile. This profile is then stored in the cache, Returned to the user. And now
+if any other user comes here, then you have that profile right
+here. So that will reduce latency, but will not get rid of latency. There's still a chance that you
+are going to have a cache miss, and you might have cash replacement
+after which that is a cash miss. So these are problems. How
+do we solve them? Well, there's only one practical way
+to solve this kind of stuff. And that's to get rid of the, the shyness that we
+have with sharing data. So if you're going to have
+multiple copies of data, it's going to solve a lot
+of your problems. Firstly, the single point of failure
+that we were talking about, if you have multiple places where
+students data has been stored, let's say a student data E B, and C's being stored here and you have
+the exact same copy here. A, B and C. Okay. And let's say, this
+is being stored in Europe. And this is being stored in the U
+S no more single point of failure. If this server this data, which is being stored in this
+silver crashes, that's okay. You can always connect to this one. So that takes care of
+single point of failure. Also, what about network issues
+when they are solved now? Because if you need to connect to a
+user C and C actually belongs to Oxford, they belong to Europe. That's okay,
+because you have the data here. Also, you have a copy of the data.
+If you need to make changes, if you need to make an update to see, you just mentioned that C gets updated
+over here, maybe C plus plus, uh, and then over here, eventually there needs to
+be some mechanism by which
+you can send this update, which makes this also
+C plus plus in Europe. So the latency problems are also fixed
+because you have quick responses. The moment you say update,
+see, once this is updated, you actually send back that response
+and users are happy. The latency is low. So we have a solid, the, and,
+uh, everything's good. Isn't it? Except for one thing, that's this big
+monster over here called consistency. Consistency says that if you
+have multiple copies of data, they should be the same. So these two copies of data should be
+the same C plus plus should be C plus plus, that's fine. It seems like we
+can do that, but how do we do that? So when you make an update over here, how do you propagate that update
+to this point, let's start simple. You can do this manually. I know you might feel like it's a
+waste of time to even mention it. But the reality is that if you have
+very infrequent updates in a product, you can make that decision that, Hey, you can keep it as C plus plus
+here and see here. You know, maybe the Europeans don't need
+to see this change for awhile. So this often happens in bank accounts. You actually make a change to
+the ledger. You just noted down. And eventually you make that system
+consistent by spreading information all around the world. So it's a bunch of
+pluses and minuses for every account. Eventually you're going to be
+showing that in the bank statement. So they even mentioned that it's going
+to take us a few days for it to reflect on your bank statement in the
+worst case. But of course, in a, in a real time response
+system, you can't afford that. If you have something like
+Facebook, you can't afford that. So we want to propagate
+this change quickly. We want to make this a C
+plus plus, how do we do that? We can use some sort of electronic
+message or network protocol, like TCP seems like a good
+idea. Why do I say TCP? Because TCP is reliable delivery.
+You also have ordered delivery. There's a lot of good
+stuff that comes with TCP. So let's try to understand how does
+this protocol work in this case, when you send an update from C to C plus, plus you're effectively saying
+change C to C plus plus, okay. That's the update that you are
+propagating from USC to Europe. When Europe gets this message C to C
+plus plus internally in their database, they have C which they change
+to C plus plus. And that's it. That's all you need to do, right? You had a message transmission
+and you're good. However, what happens if the message
+transmission fields, if there's a network issue or
+maybe the Europe server is down, what do you do then? Well, you will never get to know unless
+you get an acknowledgement, right? So the European server should send
+back an acknowledgement. That's again, quite simple. If you get an
+acknowledgement, you know, that the update has gone through
+and you're sorted, all right, what happens if you don't
+get that acknowledgement? What happens with Dr. Wiseman fields or
+the server is done, but you can retry. You can keep praying as the force
+over the us silver to make this update till it succeeds. How many times do
+you retry? You can make it in finite, which means that every five seconds
+you're going to be retrying. It makes the C plus, plus it
+makes C plus plus, or you can, uh, you know, just five times and
+then eventually you can give up. Uh, and you can also mark this record
+as maybe a, maybe a wrong record, or maybe you can afford these two
+data points to be inconsistent. This actually brings us to a fundamental
+problem with distributed systems, which depend on acknowledgements
+for consistency. The idea is that if you send
+an update to one of these solvers, then it has two options.
+Either it locally commits the update, either it makes a change or it waits
+for its peer to give acknowledgement back. If it makes the change locally, then it's already committed and it cannot
+depend on the PO to actually make the commit to, because this message
+might fail. So unreliable network, and you'll be surprised by the
+number of times this failure happens. It seems like electronic systems
+should not have these mini failures, but they're hardware failures.
+They're failures in software. There's lots of stuff
+that happens. So let's, let's assume this unbillable network and
+B may not be able to make the comment. If you wait on beat to make the comment, this is basically giving responsibility
+to be, they have the same problem. When you ask them to update something,
+you are effectively a client for B. And if B makes the comment, then B has no idea whether
+their acknowledgement is
+ever going to reach you. You can try to do something fancy, like sending the acknowledgement
+of this acknowledgement, but that's an infinite
+process. If you know, if he has already made the
+commitment, they're in trouble. If B's waiting for this
+special acknowledgement, which is Ackoff act right of
+this and acknowledgement of this, then when it makes a comment, it has no idea whether this
+is ever going to reach. And the problem is gotten
+the two General's problem. You can look it up on the internet.
+You can, you can study about this, the two journalists problem,
+but that's the basic idea. You can never be sure if
+you're making a commit, which is based on the hope that the
+acknowledgement actually goes through. So we can't have this in
+our distribute system. If you are hoping for
+consistency, what can we do? We can give them a special
+role, a leader role. So let's make a, the U S server a leader. And it's the only person who can come in. So the only person who can
+actually do rights on a database, which simplifies the system
+a bit. If you send an update, you cannot send it to be, you can
+send it only to eight. So firstly, that update comes here and he
+says, alright, change the data. He'll make the comment. Good. What about B B gets regular updates from Abe because it's the only place
+where you can write information. And B's a place where you can read
+information from. So this is a follow and the follower has
+the change in the data. Assuming that this goes through
+and things should be fine. Now to read operations are
+going to give you the same data. But of course it could be that this
+data doesn't go through. In which case, what do you do? If you read
+the data without the change, you have inconsistency. So this
+becomes an inconsistent system. Again, you are having dirty deeds. If you wait for the update to come
+through before you give it a response and that time the system is actually
+not available. If you hit the system, you're not getting a response. It's as
+good as the system is dead. It's waiting. Yes, but it doesn't
+matter. I mean, for you, you're not getting a response to this. So that's one fundamental
+problem with our, this root system. If you
+have pure consistency, then your system is not available. And
+if you have some sort of availability, then your system will have to
+suffer three inconsistencies. Okay? That's the reason why consistency is
+such a big deal. People talk about, Hey, can we have a totally consistent system? Or how much consistency are you looking
+for? But this is the general idea. I'll just expand on this a little
+more with one final example, which is called the two
+phase commit protocol sounded similar to just
+two systems and the, and the thing that we saw
+with acknowledgements. But the idea is that you have a
+leader now and you have multiple followers, like lots of followers, right? You might have BCD many. You might imagine these
+followers to also be services. You can have a profile service, which is asking the session
+service and the document service to wait. Okay? But we don't care. These can
+be gender systems. You can also have, by the way, this is a server and
+this could be Kafka a message queue. So if you want to ensure that a message
+or the event is pushed into multiple systems, definitely. Then you can go for something
+as strict as a two phase commit. Let's see what that is. Two PC. Okay. The general idea here is that as
+a leader, when you get an update, you send a prepare
+request to your followers, your followers give you an
+acknowledgement that, Hey, yes, I got the prepare request. And when you get these acknowledgements,
+you ask your followers to commit. So this is effectively
+committing a transaction, right? That's a consistency mature.
+Once you ask them to commit, I'm assuming that life is really nice
+and they give you a college Mintz and this system works perfectly. So what happened here is
+a transaction happened, maybe some sort of an operation.
+This might be a complex update, multiple statements. Uh, the leader asks its followers
+to do that in the pipette. And then finally commit that operation, which is effectively hitting control
+S which is saving in the database. That's when the data will start
+reflecting and things should be fine. However, there's a lot
+of edge cases in this. Let's see. Firstly, if you
+send a prepared statement, what actually happens when you
+have a bunch of statements in this update. So in the database what's going
+to happen is you're going to begin a transaction. And then you're going to
+write down these statements statement one, two up to N the number of statements
+required to complete this update, but there's one thing missing. And
+that is a commit. When you commit, you actually tell the database to
+reflect these changes to everyone. Who's trying to get this data. Okay. Two phase commit. The first phase is prepare and prepare is
+basically do all this stuff, but wait for my finding. Go through. Okay. So that's a prepare when
+you send an acknowledgement, you basically say that I have done
+this stuff and I'm ready to come in. The last statement has been meaning
+if a leader does not get all the acknowledgements back, it
+assumes that some of the, some of the systems, which it was
+sending a prepared request to has failed, there might be a time out,
+or there might be just, you might give a negative response.
+Also, whatever, be the case. The leader feels the transaction.
+So would hear you ghetto rollback as a followed, you can keep
+a time limit, which is, let's say five minutes or six minutes.
+You know that within five or six minutes, the leader's message should
+have reached. If it doesn't, you just do a roll back and the system
+is consistent. Why is it consistent? Well, if you have some sort of an
+update, let's say again, see Jenny, the C plus plus, uh, the leader
+first is holding this information. It's logged this role. When
+you did a begin transaction, you first logged that rule C and
+then you made it C plus plus, and it's still not right? Um, after some period of time, you saw that
+this transaction is not going to happen. There's no way it's going to happen.
+So roll it back. Convert C plus, plus to see again. And now if someone doesn't get that's
+okay, they're going to be able to see, see the same thing here. I mean,
+after the rollback has happened, once a leader has rolled back, you will be getting a get with C on
+the other hand, if things go well, then the leader will be sending
+a commit message to everyone. And once you receive this
+commit as a follower, you just commit this transaction.
+This transaction is complete. Things are fine from your
+side. The data is reflecting. It's no longer see it is
+C plus plus. Now here, and let's assume that this also
+went through properly C plus, plus, if someone does a get operation, now
+they're going to get C plus plus, which is exactly what we
+wanted. Even before that, when the leader sends a commit message, before that it actually
+commits to the database, okay? It's own database because it's the
+leader. So this is C plus. Plus, if someone does a get operation,
+now it becomes C plus plus here, once the commit operation teaches you, they get C plus plus in the
+coming operations. I mean, in the get operations, let's assume that one of these
+commits actually failed the one of the commit messages that you
+sent failed. What happens then? Well, after a certain period of time, this system is going to assume that the
+transaction has failed and it's going to roll things back. So there's a
+problem. If you, if you do that, then it's going to be C and
+this is going to be C plus plus. And if someone doesn't get operation,
+now, then we are in trouble. Okay, get we'll give a C.
+So we can't allow this. Where's the problem.
+The problem is the back. Usually in transactions, you are
+easily able to roll back. Great. Uh, in these places, you can't, you cannot
+roll back by yourself. Based on time, you have to wait for the
+master or in this case, the leader to actually send messages off, roll back in case someone sends a
+negative response, or there is a timeout, the leader actually tells them
+to roll back. The transaction. This statement of rollback is not going
+to be done by followers themselves. They are effectively brain-dead. They don't have a brain
+model, not brain dead, but the leader actually
+tells them through all back. If an acknowledgement has failed to reach, okay, that is, that is fine. So if, if you send an acknowledgement things go
+well after that, if your commit fails, what happens? Think back
+on TCP, you do a retry, you keep retrying commits. So it might be that the follower
+actually gets the commit message, but it's not able to send you
+an acknowledgement because
+of which you are doing reprice that's okay. You
+have a transaction ID. Uh, and once you do a commit
+for the same transaction ID, if you get to another commit message,
+that's okay. You're just going to say, okay, fine. I acknowledged as long
+as the acknowledgements keep failing, the leader keeps retrying and the
+commit messages keep going through. Once the commit message is actually
+acknowledged, the leader is sorted. It knows that the data that it's showing
+is consistent with the data that you are showing. Okay. Uh, is
+there any problem here? Well, if you make a commit
+of C plus plus here, and your commit message,
+doesn't go through, then you're going to get
+inconsistent data. Okay? So what you need to do
+is either block or read operations. Here, you take logs here, and
+all of your patients here are blocked. Um, and you pick a lock. So read operations and write
+operations on this rule. The CRO is blocked. So if
+anyone does a get request, they get nothing they're waiting.
+This is a problem. Of course. Uh, the problem is that your system is
+not available. It is consistent. Now your system is totally consistent
+when people are able to see, see here, they're also able to see the same
+data here, uh, when there's a change, they're also able to see that change
+being reflected to all of your followers, because you wait for the acknowledgement
+in the end and you keep retrying with no side-effects because you have something
+called the transaction ID makes this an item potent system. You can have a look at this in one
+of the other videos that are made, but the idea is like, this is a good
+idea. If you need absolute consistency, if you have a financial system, this
+is a good idea, total consistency, but the cost is that your system is down. Any get request is failing
+because this law is locked. Okay. So the general idea of all of
+this is to see what happens when you have a perfectly
+consistent distributed system. The costs are usually high, not just for
+the availability, which is one factor. There's also performance, which
+is a factor, uh, in certain cases, the cost of the system, like the
+physical cost of the system increases. So may not want to do that
+all the time. Instead, you might go for something which is
+a lot more sensible called eventual consistency. This is an extremely important
+concept in distributed systems. It comes very closely tied
+with isolation and these in engineering guarantees
+for reading and writing data. I spoken about this at lent
+and the integrated course, but the next video will be
+on eventual consistency. So if you want a notification for that,
+make sure you hit the subscribe button. If you have any doubts
+or suggestions on this, you can leave them in the comments
+below. I'll see you next time. 

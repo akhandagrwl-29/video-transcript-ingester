@@ -1,0 +1,111 @@
+So. So how do you query this database? So I would optimize the queries
+using an SQ optimizer. Well, let's say we have a lot of data. So
+optimizing queries is so, you know, old school. Just so. I could make an index on the table.
+Alright. Indexing is, indexing is cute, but we are looking for something which
+is serious. Right, we got lots of data. So can we use a NoSQL? No, we
+are not gonna learn audio m s. Now for the final time, what do you
+think we should do? So shorting, I'll use shorting. Hmm. Okay. Hired. What is sharding? Let's say you have pizza and you can't
+have the entire thing by yourself. So you break it into slices
+and call your friends. Over eight friends. Now each of these friends is
+going to get one slice of pizza. What you have done effectively is
+partitioned the pizza according to each friend's share. Just like that we can have servers which
+are going to be taking the load of the requests, which are, which are being sent
+into it. So if there's a server here, now how do you get that
+to the pizza model? User id number zero is going to
+start here. 100 starts here, 200. What you have effectively done is taken
+all the server requests that you had and mapped them onto a pizza such that
+each of these slices is going to be served by one server,
+in this case, server id. Number six. The key thing to notice
+here is we couldn't eat the
+entire pizza by ourselves. We needed friends to finish the pizza.
+To handle the pizza effectively. And when you're getting friends along, you're effectively taking the range
+of the pizza and breaking into pieces. When you're doing that, you
+are partitioning the pizza. This kind of partitioning, which uses some sort of a key
+to break the data into pieces and allocate that to different servers,
+is called horizontal partitioning. Horizontal partitioning
+depends on one key, which is an attribute of the data
+that you're storing to partition data. You can contrast this with
+vertical partitioning. There's a link in the description below, which uses columns to
+partition data effectively. But we are focusing on the horizontal
+partitioning bit and specifically we are focusing on one concept,
+which is sharding. Now, we mentioned that sharding is taking one
+attribute in the data and partitioning the data such that each server gets
+one chunk. But what I mean by servers, the servers here are database servers. Can contrast this with what we have been
+talking till now about normal servers. Normal servers are application servers. They're platform servers
+which deal with data, but they try to be as stateless as
+possible to keep things decoupled and really nice and clean. This is going to
+be dealing with the meat of the data, alright? And we can't afford
+to have any goof ups over here. Consistency is important. This is one of the key attributes
+of any database that whatever data you persist in it is what you
+can read out of it later on. And there is some sort of synchronization
+that if a person makes an update, the new request is going
+to read that update. Okay? So that is consistency. Also
+what we look at is availability, meaning that the database
+should not crash and stay down. You don't want that, you want your
+application to be running all the time, but consistency trumps
+availability. When it comes to data, in most cases there are
+more things to think about. What should you shard your data on?
+In our case, we have used user id, but in applications like
+Lindo, which use location, you could shard on the location.
+And then if a person says, find me all the users in C x, then X may fall in this shard and all
+you need to do is just read through this shard, which is what this
+database, database server
+number seven can do for you, right? That shard is going
+to be smaller in size, it's also going to be easier to maintain, probably going to give
+you faster performance.
+Everything good about sharding? And the first problem that you have
+to take into consideration is joins across shard. If these are across shards, what's going to happen is the query
+needs to go to two different shards. They need to pull out their data,
+then join the data across the network. And this is going to be extremely
+expensive. So one of the problems here joins. The second point comes when you look at
+the pizza and you realize that this is completely inflexible.
+The shards are inflexible. You can't have more pizza slices or
+less pizza slices. It's already done. But we want our database servers
+to be flexible in number. So one of the really good algorithms
+for this is consistent hashing. You should have a look at that. There's
+one database which actually uses this, and that is mem cached, right? This doesn't really
+implement consistent hashing. You can use an application logic
+about the database mem cashed to get your work done. So it's not
+really a problem. It might be a problem, but you can't have
+dynamic number of shots. Now to overcome this problem,
+what we do is take a shot, which has too much data in it and
+then dynamically break into pieces. So this pizza slice is
+like a pizza for us. Yeah, when we magnify it enough, it's
+going to be a really large slice, and then we break it into smaller pieces. So there's going to be some sort of
+a manager for every particular shot, which is going to map the requests
+to the correct mini slice, so to speak, in the pizza
+slice, single pizza slice. Using this technique, which
+is hierarchical sharding, we can get rid of the inflexibility
+over here. So point number two is no longer a big problem. Now, one of the smart things to do here is
+to create an index on these shards. Assuming your query requires that this
+index could be on a completely different attribute compared to the user id. And one of the good examples of this is
+find me all the people in New York who have age greater than 50. So
+if these are the city IDs, then New York is going to land, let's
+say here, and then you can index on age. So you'll find all users in New York within a given range of age. So all of your queries are fast. So that's the most important
+thing about sharding. Your read performance goes up and your
+right performance goes up because all of your queries fall on one particular
+point. But what happens if a shard fails? Let's say there's some sort of electricity
+issue over there. In that case, you could have something like
+a master slave architecture. The master slave architecture
+is a very common architecture. What happens in this is that you have
+multiple slaves which are copying the master. Whenever there's a right
+request, it's always on the master. The master is the most updated copy, while the slaves continuously
+pull the master and read from it. What then happens is if
+there's a read request, it can be distributed across slaves.
+While if there's a right request, it always goes to the master.
+In case the master fails, the slaves choose one master
+amongst themselves, right? And so there's good single point
+of failure tolerance over here. Conceptually, it's quite
+easy. You just take your data, break into pieces break
+into ranges essentially, and then persist in different places. But when it comes to
+practical application, this is quite tough because
+this guy consistency is difficult to do. And if you're just starting out with
+your system and you you're thinking about charting, I suggest that
+you take into consideration. Although mechanisms like indexing,
+like using NoSQL databases, which internally actually
+use these kind of concepts, but to use those ready-made
+solutions or to use well-known solutions like indexing is probably the
+way to go before you go for sharding, a database even more difficult than
+sharding is to hit the like and the subscribe button at the same
+time. If you're able to do that, then you'll get notifications for further
+videos and I'll catch you next time. 

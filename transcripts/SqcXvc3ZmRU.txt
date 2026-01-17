@@ -1,0 +1,137 @@
+ Hey everyone, today
+we'd be talking. I'm sorry. Is it fine if I record a video? No,
+no problem. Oh, thank you so much. . Usually when you're building a
+system and engineering system, there's actually some sort
+of background behind it. We'll be taking a real world
+example of opening a restaurant. Let's see how that happens. Let's take an example of a pizza
+parlo and we have just one chef. There comes a point though that one chef
+cannot handle all the orders that all the new customers are bringing in. If you think like a manager, the first thing that you're going to do
+is ask the chef to work harder and you can pay them more, put in more
+money. They give you more output. You want to optimize processes
+and increase throughput using the same resource. When you
+think of the chef as a computer, and put this in technical terms,
+it's called vertical scaling. Speaking of optimizing processes,
+you can do some things beforehand. When you get a order, you don't need
+to actually make the pizza paste. That can be pre-made preparing
+beforehand at non-peak hours. The reason you want to do this at
+non-peak hours is because you don't want a regular order to come in and your
+chef being busy making the pizza basis somewhere around 4:00 AM in the night
+is really good because you surely won't have any pizza orders that time.
+Now that the system is set up, let's make it resilient. Let's say that the chef calls
+sick one day. At this point, your business is in trouble because
+there won't be any business that day. This person is a single point of failure. So what you can do then is hire a backup
+chef in case the chef doesn't come. You employ them for that day only and
+you pay them. Of course, in this case, the chance of you losing out on business
+is really low because you have not just one chef, but also the backup. Keep backups and avoid
+single points of failure for computers. It's something like a master
+slave architecture, the master chef, and you have a slave chef, which is a
+little lot to say. So that's what we need. Now, if your business
+keeps growing every time, then you better make that backup
+chef a full-time chef. In fact, hire more chefs. Let's
+say instead of one chef, you have now 10 chefs and a few
+in backup. Also, just in case, hire more resources, which
+maps to horizontal scaling. Horizontal scaling is buying more
+machines of similar types to get more work done. Let's say we have three of our chefs
+over here, one, two, and three. They have some specialties.
+Here's a question. You have chefs one and three who are
+experts at making pizzas and chef two's expertise is garlic bread. If you
+have two types of incoming orders, which is pea and garlic bread,
+how would you route them? What you can do is randomly assign the
+orders. So if you have garlic bread, it can go to chef, to chef one, you
+can take pizza and send it to chef two, but this is not the most efficient
+way to use your employees. You can build on their strengths and
+route all garlic bread orders to chef two and all pizza orders
+to chef one and three. This makes the system a little simpler
+because anytime you need to make a change in the recipe for garlic bread,
+you just need to notify chef Two, anytime you need the status
+of any order on garlic bread, chef two is the person you ask.
+You can actually make a team like a team of chefs over here who
+are specialists in garlic bread. Maybe you just need three chefs over here
+for garlic bread because the number of orders is going to be a
+little less. So for pizzas, you need the remaining seven chefs
+distributed enter team of three and four. They're good at making pizzas and
+they're getting all the pizza orders. What you're doing is you're scaling this
+team at a different rate compared to these two teams and also
+dividing responsibilities. So we have something called
+a microservice architecture. You have all your responsibilities
+well-defined over here. There's nothing outside your
+business use case that you handle, so that is point number
+five. At this point, a pizza shop is actually doing really
+well because it's able to handle all orders within time, and it also has specialists for
+everything which you can scale easily. This business is scalable
+to a large extent, but what if there is an electricity
+outage in this pizza shop? You won't have business that day. What
+if you lose your license for a day? You won't have business that day. So what you want to do is you
+want to distribute. I mean, you don't wanna put all your eggs in
+one basket, not not even in one shop. You wanna buy a separate
+shop in a different place, which can also deliver pizzas.
+Maybe it takes more time. Maybe the number of chefs there is
+lesser, but at least you have a backup. So we take backup to a different
+level O here and open a new shop. This is probably the biggest step where
+we introduce a lot of complexity to the system because there sometimes needs to
+be communication between these shops. You need to be able to
+route your requests. I mean, you get a request for a pizza.
+You need to be able to tell that, should I order it to this or
+should I send the order over here? A distributed system. And one very clear advantage that we can
+have here is that any orders which are very close to this, which are local to
+its range, can be served by this shop in a large scale distributed
+system. Let's say Facebook, you get requests from all around the
+world to give quick response times. You need some sort of local servers
+everywhere, and that's what we are doing. We are distributing our system so that
+it's more fault tolerant and also gives quicker response times. Let's say you
+have the old shops pizza shop one and two, and you have delivery agents
+and you have customers. Every time a customer makes a request, they need to either send it to one or two, but the customer is not going to
+be taking that responsibility. So you want to send it to somebody else, maybe a central place
+which just routes requests, and you don't just want to
+send these requests randomly. You have a very clear parameter. How much time does it take for the
+customer to get the pizza? That's it. That's your parameter. If you
+send it to pizza shop one, it's a really popular shop. Maybe it takes one hour for it to wait
+in queue plus five minutes to make plus 10 minutes to deliver from
+PSS one to the customer. Over here, pizza Shop two has a
+really short wait time. The total time required here
+is one hour five minutes, which is less than the one hour
+15 minutes required over here. So the central authority should
+actually send it over here. So, and as long as it's
+getting real time updates, it can make intelligent business
+decisions, which means more money. This thing that route requests in a
+smart way is called a load balancer, and you can assume why the
+system is now fault tolerant, but how do you make it flexible to change? At this point, you can almost tell that the delivery
+agent and the pizza shop have nothing in common. I mean, it could be a pizza shop, it could be a burger shop
+for the delivery agent. They just want to deliver their goods
+as quickly as possible to the customer. And similarly, the pizza shop doesn't care whether
+it's a delivery agent or the customer themselves who come and pick it up. So we are seeing some sort of
+separation of responsibilities. Instead of having the same managers
+managing the pizza shop and the delivery agents, you want to separate that out.
+It's called decoupling the system, separating out concerns
+so that you can handle separate systems more efficiently. Let's say pizza shop one has a faulty
+oven, their churning rate goes down. If you have a faulty bike, maybe that particular delivery agent's
+order times increase. So at this point, what you want is you
+want to log everything. You want to see at what time something
+happened and what is the next event, and so on and so forth. And also
+you want to be taking those events, condensing them, finding sense out
+of those events. So that's metrics. The final and most important point
+is to keep your system extensible. As a backend engineer. You don't want to rewrite all this
+code again and again to serve a different purpose. For example, this delivery agent doesn't need to
+know that they're delivering a pizza. It can be a burger tomorrow. And
+if you think about Amazon earlier, they used to deliver only parcels. And the reason why you can scale out
+your business is because you want to decouple everything to make sure
+that your system is extensible. What we have done is
+taken a business scenario, try to find solutions to all the
+problems that it came up with, and then just map them into technical
+terms. Now, if you think of these, they are solutions in themselves for
+the technical counterparts of these problems. Finally, we have managed to
+scale our restaurant at a high level. We can now define what kind of problems
+we face and how we'll be solving them. This is known as high level design.
+There's a counterpart to this, which is called low level design.
+Let's briefly talk about that, the difference between high level system
+design and low level system design. So high level is what we talk
+about on this channel. You know, deploying on servers figuring out how
+two systems will be interacting with each other. Lowell system design has a lot more to
+do with how you're actually going to code this stuff, like making classes, making
+objects, the functions, the signatures, these things are pretty important
+if you are a senior engineer. And even if you're not, if you want
+to go to the senior engineering level, you need to know about how do you
+write efficient and clean code, the load band. So microservice architecture and a
+few other videos are there in the description. And if you want
+notifications for the future videos, you can hit the subscribe button.
+Until next time, then I'll see you. 

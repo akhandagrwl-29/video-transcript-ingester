@@ -1,0 +1,115 @@
+Hi everyone. This is GKCS. We are
+talking about consistent hashing now. So this is, as you can expect, relevant to the concept
+of hashing objects. So consistent hashing
+has certain properties, and this is something that you need
+to know if you are building systems, if you're building systems which
+can scale to a large extent. So many of these terms that I'm
+stating right now might be, you know, jargon For you, you might be
+saying, what do you mean scale, but what do you mean systems?
+So if you have, let us say a box, just a, just a computer
+which is running a program, right? And someone your comes to you
+and says that, you know what? I really like your algorithm. I'll pay you money just
+to use your algorithm. Okay? So there's this person over here who has their cell phone and they can
+connect to your box, your computer, they wanna use your algorithm, get the
+result, and every time they do that, they pay you some money or maybe at
+the end of the month or whatever. But keeping the money better aside,
+keeping the sales, marketing, everything aside, we have
+technical specifications, right? This algorithm needs to run for
+the customer to be happy and you to be happy in turn. So when I say that this
+is an algorithm running on a computer, this is like a server, right? That's what it means. A server
+is something which serves requests. And when that person is
+connecting through the mobile, they're technically
+sending a request. Okay? You, they send a request,
+your algorithm runs, you understand what they want. Let's say the algorithm is a
+facial recognition algorithm, which gives them mustache, right? So your response is going to
+be having that image sent back. So your server takes requests,
+sends backs, response. Now let's say one person comes to you
+and they're happy, they're really, really happy. So they tell all their friends and you
+have thousands and thousands of requests coming in. Your computer
+cannot handle this anymore. So what you do is you add
+another computer because you know you're getting a lot of
+money from all these people. Now you can afford to buy a
+new computer, a new server. If you can do this, there's one problem. Where do you send the requests?
+Like if there's a second person, then should the request go here
+or should the request go here? At the bare minimum level, if
+you have, let's say, end servers, you want in general to balance
+the load on all of these servers. Now you can imagine all of these servers
+actually carrying load these requests are things which they need to process. So the server has load On it. This is pretty important, right? And the concept of actually taking end
+servers and trying to balance the load evenly on all of them is called load balancing. Okay? So this is our very simple problem. What we are going to try to
+do is take these requests and evenly balance the load
+on all of our end servers. And the concept of consistent
+hashing will help us do that. So. You want to evenly distribute
+the weight across all servers. You'll get a request ID in each
+request, right? So that request ID is, you can expect uniformly random. So when the client says, when the, when
+the mobile actually sends you a request, it randomly generates
+a number from zero to M minus one. And what happens is this request ID is
+sent to your server. What you can then do is take this request id, I'll call it I, or I'll call it r r one and hash it. When you hash it, you get a
+particular number. Let's say M one, this number can be mapped
+to a particular server. How? Because you have N servers, you take the remainder within
+whatever index you get here, you just send that to
+the respective server, right? So let's say you
+have four servers, S zero, SS one, SS two, and SS three R one is 10. When you pass it
+through your hash function, you get the value three, three mod four, and it's four In our case is three. So this will go to bucket number. This request, R one will
+go to the server three, okay? Another example, H of 20. Let's say this somehow gives you 15 and mod four. Again, this gives you three. So R two also goes to three. And. Finally, if we have edge of 35 when hashed gives you 12, this mod four gives you zero. So R three maps to the first
+server, right? And in general, because this is uniformly random and
+your hash function is uniformly random, you can expect all of the
+servers to have uniform load. So each of the servers, if there are
+X requests, will have X by end load. And the load factor is one by end. So everything's perfect and
+that's all we need to do. Hmm, except what happens if you need
+to add more servers? We said that initially our
+clients are very happy with us. So we are getting viral or for some
+reason, you know, people are really, really hitting our servers a lot.
+What happens if that happens? We need to add more servers, S four. But now there's a problem. The requests which are being served
+here are completely bamboozled. The request id. So when you pass 'em
+through the hash functions, the values, you are getting four three
+mod four, this has to change. Now you have in total five
+servers. So three mod five R one has to go to Server
+three. So that's okay. What about 15 mod five,
+this has to change. It has to go to server zero because this is zero, right? What about this 12 mod five, this is equal to two. So this
+request, R three again, has to change. And. Go to S two. And this is very clearly
+illustrated in a pie diagram, right? This is your pie.
+Initially you had four servers, so the pie was 25% for every person, right? So this is having 25, 25, 25, 25. So they have 25 numbers assigned to
+them. Now, when the fifth server came in, this had to lose five of its buckets. So there was a change of five buckets. This had to take these five
+buckets. So that is plus five go up to 40, right? So instead
+of 50, it goes up to 40 only. So this lost 10 buckets. So
+that's 10 buckets changed. When I mean buckets, I just mean numbers. So those are just numbers which it lost. So this is up to 14. Now this server S three or rather S two, so this is SS zero. SS one S two has to take these 10. So
+that's plus 10 as a change. Plus it goes only up to 16 now. So instead of 75, it goes only up to 16. So that's 15 plus 15 buckets changed. Now S two is done. We go to SS three, which is the last server that we had. And this now has to go only up to 80. So what happens is it lost. So it has five buckets
+remaining in its old section. It lost 20 buckets here and it had to take 15 buckets from here to have
+a total of 20 in SS three. Okay? So that is 15 buckets added to it and 20 buckets lost. And finally, SS four has to actually take 20
+buckets. So the cost of the operations, if you see the cost of the
+change in this is five plus 5, 10, 20, 30, 40, 50, 60, 70, 80,
+9000. So in total the change was 100, which is actually your entire sort space. Now why is this such a
+big deal? You know? Okay, 100 changes, the whole thing changed.
+So what, well, because in practice the request ID is never
+random or it is rarely random. The request ID usually encapsulates
+some of the information of the user. For example, the user
+id. So if I hash got up this hash is going to give me the same
+result again and again and again because the hash function is constant.
+If I'm getting the same result, it means that when I model A with N, it's going to send me to the same
+server again and again and again. Now, why not use that information if I'm
+being sent to the same server again? And if there is something
+like fetching a profile from a database, why should
+I do that all the time? Why not store it in
+the local cache, right? That seems like a smart thing
+to do depending on the user id. So instead of R one, I'll, I can call
+it U one, but I'll still call it R one. So depending on the user id, we can send people to specific
+servers and once they're sent there, you can store relevant information
+in the cache for those servers. But through this policy, what's going
+to happen is the entire system changes. All users are now Azar sent to different
+places and all the useful cache information you had is
+just dumped. It's useless. Almost all of it is useless
+now because the numbers that you are serving completely
+changed. So what you want to avoid is a huge change in the range
+of numbers that you're serving. If you're serving from this to this, then a small change is what you want
+here. If you're serving from here to here, then you don't want a huge change here.
+What you want is a tiny change here. So in a new pie chart, what's going to happen is if this
+is the pie chart and this is the quarter thing, what I would like to do is
+take a little from this first server, so that is, that is this bit,
+take a little from the second server, take a little from the third server, and take a little from the
+fourth server such that the, the sum of these areas is
+going to be 20%, right? Because you added one server, you have
+five servers, you want 20% on each. So the sum of these areas should be 20%, but the overall change should be minimum. That's the general idea why the
+old standard way of hashing doesn't work. In this case, we need
+more advanced approaches, and that's where comes
+consistent hashing comes in. The topic that. We are gonna be talking about today
+is relevant to hashing and it's called consistent hashing. 

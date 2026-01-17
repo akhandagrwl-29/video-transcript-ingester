@@ -1,0 +1,311 @@
+Hey guys, this is GKCS! It's been a long time since we have made
+a system design video and today we'll be talking about designing Instagram. An obvious thing about Instagram is
+that you can store and get images. So that feature we can assume to always be in an Instagram interview. Now,
+any other feature is not obvious, so don't jump to what you'll be building
+before your interview actually mentions it. You might have used Instagram,
+you might know what it does. However, the interview might be
+expecting something and they, they might know that the time constraints
+doesn't allow you to dig deep into all of these features. So better
+ask them, what do you expect? So the interviewer might mention
+that you want to provide a like plus comment facility for an image, right? You can also share
+an image in Facebook. I'm not very sure about Instagram, but let's keep it simple
+like and comment on posts. The third thing is you can
+actually follow someone. So every Instagram account is that
+of a user. That's my expectation. In Facebook, again, you have a bigger complication that
+pages can actually be followed. And the fourth thing
+is you need to publish a newsfeed. Alright? These are the four key features
+that we have of Instagram. It may not be the most selling thing, but
+of course as a system design engineer, these are the things which
+are difficult to design, or at least these are the basics
+that we should know when we are doing Instagram. So amongst these, storing and getting images is something
+that we already done in our Tinder video. Tinder video it's in a
+card floating up there somewhere. So the key things over here is
+that you want cheaper storage. So you probably go for a file system, you create a C D N over it
+so that things are fast. And just have a look
+at the Tinder you know, video to get a better understanding here. The second thing is liking
+and commenting on images. Now images are nothing but posts and the concept of a post
+is pretty interesting. Can you comment on a comment? Is a
+question to ask. So is this recursive? This is a question. Can
+you like a comment? Now, Instagram does provide you the
+facility to like a comment. Instagram does not provide you the
+facility to comment on a comment on a comment. You know, it gives you one
+layer. So if there is a comment over here, You can actually reply to that,
+but you can't reply to reply. So through this, it keeps the level
+of complexity constraint. Yeah, there's just one level of
+comment and then reply. However, there's nothing really stopping the system
+mathematically from making a reply to a reply. But this is a interview. So we'll keep things simple and we'll
+say that you can't even reply on a comment. There's a single comment you
+can do. Okay? So no complexities here. You can like a comment though,
+I'll give you that. You can like a comment. So if you think in terms of
+the ER diagram of this feature, single feature of liking and commenting, we will have the like stable being
+represented as the post, which was liked, who liked it, the user id, the timestamp. At what time did they
+actually like the post? And is the like still active is one
+thing or you can just delete it. Yeah, it shouldn't be too much of an issue,
+but I will just call it active or not. Now, we just said that likes can
+actually be on comments also. So the post ID could be useful, it could tell us the post in
+which the comment existed. But a better way to
+represent this would be, I mean the only way to represent this, so to speak is parent id, parent ID could be either
+a comment or a post. So how do I figure out looking at a, like
+whether it's from a comment or a post? One of the things you can do is you can, in the parent ID itself mentioned
+comment underscore 1, 2, 3, and 1, 2, 3 could be the comment ID here.
+Okay? But this is pretty poor design. Instead, what you can
+keep is a type field. So this type is going to be either comment or it's going to be a post.
+And using this, using the type, you can tell what type
+of parent do I have, which tells you where to query in case
+you want to know what is the original thing, which is liked by the user. Okay? So these are the kind of things that
+we can do with just the like table. What if you need to find the number
+of likes for a particular post, you can do a select star, I mean select count star rather. And if you're finding any of
+this complicated, you know, just have a look at the other
+system design videos. In fact, you shouldn't be finding this
+complicated. It's an ER diagram. So yeah, in case you're finding it complicated, I'll mention a link in the
+description below. It's on databases. You can have a look at
+that count star from likes where Post ID equal to some user parameter.
+So if you're passing in the post id, I can tell you the number of
+likes in that post. However, we should be flexible and we should be
+thinking about things which are going to happen in the future. You need to
+be able to generate a newsfeed. And a newsfeed is going
+to have a lot of images, a lot of posts that will fire
+a lot of select star queries. So this is one way it's gonna be time
+slow. We are going to ignore this way here. What you could do is add
+a column called likes. And whenever there's a like
+added for a particular parent id, if that parent ID exists in post,
+then you increment this likes column. If the parent ID exists, I
+mean is is a type comment, then you increment the
+likes column over here. However. This is pretty bad design because you
+have something which is not really relevant to this table kept here. It's an aggregation information which is
+being stored in the original table for convenience. Okay? So again, we are going to be changing our design
+a little bit and saying we are not gonna be storing likes here. Main reason
+being that it doesn't belong there. If you have a comment being pulled
+out, you also have a number of likes. So there could be useful, could maybe not. Instead you can have an activity table. And this is going to be
+defining the number of likes for a particular parent
+id. So I'll just call it activity id and it's gonna be activity id and it can store the type two. But do we really need to,
+no, it's just aggregation. So you don't need to store the type.
+You could, but you don't need to. What else do we need? Well, the
+comment is going to have an ID itself. It's going to be having something called textual
+information. Yeah, could a comment have an image? It
+could, you need an image all then, but right now comments can't
+have images. And you let, let's try to figure out
+there's a timestamp, which
+is always going to be there. Anything else we have actually missed
+out something on the likes here. By putting a comment id, what I should
+do is I should also put a, like ID and nearly all tables have IDs. This row is going to be defined
+using this id, okay? A u u Id maybe Uniquely identifies this role. So uniquely identifies this action where
+there was a like done by this user on this activity at this time, and
+so on and so forth. Okay? Now, whenever your system is queried on, let's say find me the number
+of likes on this post, it can just go and query this table
+whenever there's a question on find me all the comments for this particular
+post queries, this table, find me, all the people who have liked this post
+comes on this table. And the queries, I'll mention them in the description
+below. I'll just, you know, because the queries are
+mainly database queries. But what we can understand here is that
+we have designed the system such that the information is available
+in a nice way. Okay? So this is our original ER diagram. And
+of course if you need the post itself, you have the post ID right
+here. Ah, interesting. Get me all the posts for this user
+is something that we might do. So the post is going to
+be having a user ID too. Okay, who has made this post?
+Alright, so as you can see, making an year diagram is not
+easy. It's a lot of you know, changing your tables, understanding how you will be showing
+that information or retrieving that information. But keep
+your diagram flexible. Make sure that you are keeping everything
+which is in future and current in mind. Sometimes you can't, you don't
+think about the future too much. So in that case, just try to keep
+your tables as simple as possible. So feature number one and two are done. The third feature is actually very easy. All it does is a user
+following another user. So there's two kind of
+questions you can ask. The first one being that who follows me? And the second one being who
+are the people who I follow? So with those two questions, both of them
+can be answered using a single table. We have the follower user id, the
+person who is following someone, the followee user ID is going to be
+the person who is being followed that person's user ID and the time
+at which they start following. So this takes care of the whole
+thing. Let's say  follows Stephen Hawking. Alright at timestamped, let's say today, now there's gonna be lots of other
+users who follow Stephen Hawking. So whenever I need to find the people
+who are following Stephen Hawking, I just come to this column, put a equals condition saying that
+Hawking and give me all the followers. So it gives you all the
+followers as a list. Similarly, who are the people who got followers?
+Gotta probably follows a lot more people. There's Bill Gates. So these kind of guys, when I can actually get their user
+IDs using just a single equals on this column, that takes care of Requirement number three. One of the questions I'm often
+asked is that during an interview, if you know the answer to a question, should you build the answer slowly or
+should you just directly give the answer? I believe you should
+directly give the answer. It saves a lot of time for
+the interviewer and for you. It's also something that I
+really appreciate because it, it shows that the person
+has prepared. Well. Two things which are for this point
+are that the interviewer is probably expecting to ask you more
+questions. So this is a simple one. If you answer it quickly, they'll ask
+you the next one. The second thing is, if you answer this quickly, they can get into the advanced topics
+that they really wanna talk about. That is the approach we're
+taking in this video too. We are not going for
+extremely simple answers. We are going for slightly
+advanced system design concepts. I'll be explaining this design using
+animations because that would be clearer. If at any point you find something too
+complicated or if at any point you see something that you don't understand, you can always fall back on
+the system design videos, especially at the system
+design for Tinder video, because there's a lot of things like
+the proxy and routing that we talk about over there. Since Instagram is a mobile application, it needs a way to connect
+to our server side. I'm going to be assuming that there's
+a gateway which is going to be encapsulating a lot of things. The reverse proxy is also the gateway
+for me because it's going to be deciding where to send the request to. It's going to be encapsulating some
+security mechanisms like authentication tokens and so on and so forth. One important thing that the gateway can
+do is it can take external protocols. Well-Known public protocols like
+S T P or sending messages or web sockets is through X M P P. Usually these protocols can be converted
+to a protocol that we understand internally. We might be talking
+over some other protocol. Now this is just added security so that
+no one knows how to hit your server using the language that you understand.
+And that can be done using the gateway. Now, when a simple request
+like get user feed comes in, which takes a parameter of user id, it'll
+come to one of our internal services. I'm assuming there's a service
+called User feed service. This service provides
+the user feed for a user. So that is the top 20 posts
+that the user needs to look at. It'll be like a newsfeed to make
+the service resilient and also to scale, we need multiple servers
+running the same server. If you bring in multiple servers, you bring the question of how do I route
+a request from the user's cell phone to a server in my server site? This
+can be done using a load balancer. Now it's too expensive to ask the load
+balancer every time where to route the request. So what we can do is we can store
+snapshots of the entire system. The load ban will be maintaining
+the state of the entire system. It's like a snapshot of all the services
+and where they exist in which boxes and how do I connect to them. That kind of information is stored on
+the load ban and it keeps coordinating with the gateways and every other service
+in the system making sure that they know how to send a request
+to the correct area. So the load ban sends this information
+to the gateway as a snapshot. This snapshot will be periodically
+updated, let's say every 10 seconds. So when the gateway gets
+this user feed request, it reads from the snapshot where it
+should send the request to which user feed service box should it send the request
+to, and then forwards that request. I'm assuming that the load is
+balanced using consistent hashing. So just by hashing the user id, you can find the box where you
+should send the request. Importantly, the user feed service is
+dependent on two other services, the posts service and the follow service. The post service, as you can think of it just
+stores information about
+the posts that a user has been made. So it'll be giving you the posts for
+every user ID or maybe post for a particular day and so on and so forth.
+Those are the APIs that you'll expose. The follow service tells you the two
+important questions answer to the two important questions of who are the people
+I follow and who are the people who follow me. Apart from this, of course, there's a lot of services that I'm just
+going to be skipping because we have either already spoken about them or
+they're not called to this particular application and we'll be speaking about
+them in future. So just to name a few. One would be the image service.
+There's also the activity service, which you have explained.
+There's the chat module. I would say it's not
+even a single service, it's a entire set of services and the
+profile service which is gonna be storing user information like the profile
+picture sessions management and so on and so forth. So there's a lot of things that we
+are going to be keeping hidden for now so that we understand the important
+features that we need to build currently. Now getting back to the question of how
+do I find the user feed for a particular user id, the simple way would be
+to get all the people who I follow. So get users followed by and you pass
+in a user ID that returns the people who are followed by this particular
+user id. So if I pass in my user id, I get all the users who I'm following.
+Once I have this set of users, I can get the posts made
+by these users. For that, I'll need to query the posts
+service. Once I run this, get posts by user in a fall loop, I mean basically I'm going to be finding
+the posts by every user who I follow. So that'll be, let's say if
+I have 10 users who I follow, I'm going to be making 10
+requests to the post service. I'm going to be then condensing
+all that information. I'm going to be converting into a single
+set and then returning to the mobile application through the gateway. Now, there's a lot of wasteful competition
+over here. You can expose an A P I, which is guest get posts by users, and you pass in a set of user IDs and
+you get all the posts in just one go. So that would be one
+optimization that we can do. The second optimization would be just
+to limit the number of posts that we are calling out of this post service because
+that would reduce the load on the database that it's using internally and
+reduce the load on the service also, so the network load will reduce. And of course when we are
+sending back to the client, that would also reduce the load. However, this is not going to scale if for every
+user feed request we have to recompute all the posts that this person wants
+to see. It's going to be too expensive, especially on the post service. It's going to get bombarded and those
+complex queries that the post service has to do. In fact, most likely you'll be ending up doing
+some joins on the post requests on that database. So it's
+definitely not gonna scale. The correct solution in this case
+is to pre-compute the user feed. Anytime a user feed request comes in, we just return the user feed in one
+shot because we have pre-computer it. The only question which remains is how
+do we pre-compute what is the user feed? It's a set of posts that I want
+to see. What are those posts? I I want to see the posts made
+by people who I follow. Okay, breaking down this problem, it comes to every time a person who I
+follow posts something on Instagram, we need to update my user feed. So whenever there's a post request
+from a user, it goes to a post service, gets persistent on the database, and the post service should actually
+send a notification to the user feed service saying that, Hey, here is a post. You should update your
+pre-computer user feed depending on who are the people who follow the
+person who has made this post. Alright? So what that is allowing is that there's
+a small incremental update on the user feeds of people who follow
+this particular user. So if I imagine a few lists of posts, which is nothing but the user feed
+of user ID one, two, and three, all I need to do is find the user ID
+of the person who has just made a post, get their followers, and then add to each one sku. Since the size of the SKU is at most 20, this is a pretty efficient
+way to store the user feed. Now since we are talking about storage,
+where should we store this data? Should it be on the database or
+should it be on the cache? Personally, I would prefer using the cache. The reason for this is because it's
+going to be separating a lot of the logic that we have on this user feed service.
+Anytime we lose any kind of data, we can recompute it using the previous
+brute force formula that we had. Basically finding all the people who
+I follow and then getting their posts. So that would be a one time thing
+in case there is a problem with the memory. So when can there be
+a problem with the memory? Well, if the service crashes, that's fine.
+It's stateless, it can again be compute. Also one thing that could happen is you
+don't have infinite memory, you know, in cache. So what you're gonna be doing is the
+most recently used users will be the ones who will have the user
+feed served by cache. If there's a person who's
+logging in infrequently, there's no use wasting memory
+for them. When they do log in, then we can recompute the user
+feed for them and then, you know, the cash management policies are going
+to take care of the user feeds for that user. So this is a really nice way, I think what we can do is we can use
+caches to store the user feeds and it's going to get to the users very quickly. One interesting thing with this user
+feed service is that every time it gets a new post which it has to
+show to the relevant users, it can actually send notifications
+to the relevant users. So if there are two people
+who are following User X, then the user feed service will notify
+those two users. Also, of course, for this, you need either polling from the
+cell phones every 10 seconds, they keep polling that, is there
+anything new in my user feed? And so on and so forth. That's
+a slightly expensive operation, depends on your use case of course, but you can imagine the cell phone taking
+more bandwidth and more battery for this kind of stuff. You can push notifications from
+the server using multiple ways. My favorite is web sockets. But yeah, you can use long polling
+and so on and so forth. An interesting thing is how do you route
+these requests back to the cell phones? And especially when there's just one
+request coming from the server side and it has to be routed to let's say 50 or
+60 users who are following this user. So we'll be discussing that in the
+next video, which is a chat service. In fact, I think I have already discussed a little
+bit about this in the Tinder video, so you can get an idea over there and you
+can look for a detailed description in the next video. The final use case is that what if a
+celebrity makes a post a person with millions of followers? In this case, what would happen is if the user feed
+service behaves in the normal way, it's going to be sending out
+notifications to a million users, and that is going to crash the system
+more likely because sending a million requests is, is too heavy a
+task to be done immediately. There's two approaches to solving
+this. One is batch processing, where you send notifications in
+a batch of 1000 people. So every, let's say 10 seconds, you send a notification to a
+hundred people the next 10 seconds, a hundred people, and basically you are rate limiting
+the number of requests you're sending outside. And the other approach,
+which is very interesting, is that you don't send
+notifications to the users. You wait for them to pull
+notifications from you. Now you've seen these
+green boxes over here, maybe they're fans of this particular
+celebrity. What they'll be doing, what the applications will be doing is
+that periodically they'll be pulling the server for requests. So this is a pull model that we
+have instead of a push model. The push model always has a problem of
+fanning out where there's millions of requests you need to
+sign and it goes crazy. The pull model has advantage that you
+can do this slowly because there's a lot of users who are not going to be pulling
+at the same time. The push model, of course, has the advantage
+that it's very seamless. The moment there's a request, you give that notification back to the
+users and they feel like it's happening all in real time. So in this
+debate of pull versus push, what you're really looking for is a hybrid
+model. Whenever there's a celebrity, what you want to do is you want to go
+for the pull model because there's too many requests to send. And
+whenever there's a normal user, you can go for the push model. So that
+the thing is seamless. In general, this architecture is excellent.
+When you're looking for a newsfeed, there's a lot of applications which has
+this Facebook, Twitter, Cora Instagram, like we have spoken about. All these applications require
+some sort of queue or list in which you are going to be maintaining
+a size of X number of posts that a person has made, and then you
+send it to all their followers. With this architecture,
+user feed services are done, so that takes care of the fourth
+feature, which is the user feed service. Of course, in a real interview,
+they can get into anything. They can get into the profile
+service, maybe the chat module, which I've not talked about. You know Instagram does provide direct
+messaging or they can talk about something like while using the H T P
+protocol or web sockets and et cetera, et cetera. But if you can actually come up with
+these kind of justifications and arguments for the things that you're building, it shows that you understand
+the system at a good level. Feel free to leave any doubts or
+suggestions that you have below. If you like the video,
+then hit the like button. And if you want notifications for
+further videos, hit the subscribe button. I'll see you next time. 
