@@ -36,6 +36,8 @@ jobs:
           PSQL_USERNAME: ${{ secrets.PSQL_USERNAME }}
           PSQL_HOST: ${{ secrets.PSQL_HOST }}
         run: |
+          python youtube_transcript.py
+          python insert_into_vector_db.py
           python search_from_vector_db.py "database optimization"
 
       - name: Commit transcript file
