@@ -68,7 +68,7 @@ jobs:
           PSQL_USERNAME: ${{ secrets.PSQL_USERNAME }}
           PSQL_HOST: ${{ secrets.PSQL_HOST }}
         run: |  
-          python search_from_vector_db.py "database"
+          python search_from_vector_db.py ${{ inputs.question_text }}
 
       - name: Commit transcript file
         run: |
