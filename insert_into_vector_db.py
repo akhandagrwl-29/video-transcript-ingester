@@ -14,11 +14,15 @@ def get_embedding(text):
 
 
 
-conn = psycopg2.connect(NEON_DB_URL)
-cur = conn.cursor()
-
 def insert_into_db():
     os.read()
+    PSQL_USERNAME = os.environ.get("PROXY_USERNAME")
+    PSQL_PASSWORD = os.environ.get("PROXY_PASSWORD")
+    PSQL_HOST = os.environ.get("PSQL_HOST")
+    
+    NEON_DB_URL = f'postgresql://{PSQL_USERNAME}:{PSQL_PASSWORD}@{PSQL_HOST}/neondb?sslmode=require&channel_binding=require'
+    conn = psycopg2.connect(NEON_DB_URL)
+    cur = conn.cursor()
 
     for i, chunk in enumerate(chunks):
         embedding = get_embedding(chunk)
@@ -30,7 +34,7 @@ def insert_into_db():
             (video_id, i, chunk, embedding)
         )
 
-conn.commit()
+    conn.commit()
 
 if __name__=="__main__":
     insert_into_db()
