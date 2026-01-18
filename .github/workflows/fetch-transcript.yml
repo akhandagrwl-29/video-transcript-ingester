@@ -1,6 +1,9 @@
 name: Fetch YouTube Transcript
 
 on:
+  repository_dispatch:
+    types: [cron-trigger]
+
   workflow_dispatch:
     inputs:
       url:
